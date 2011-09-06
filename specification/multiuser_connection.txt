@@ -1,0 +1,49 @@
+multiuser request (type 200)
+----
+
+int | string | uuid
+type | username | multiuser_uuid
+
+example
+200 | "Guest" | {C1D64EF0-61FB-44F4-9C81-AE7EA8EBBCD8}
+
+
+
+multiuser response (type 201)
+----
+
+int | string | uuid
+type | username | multiuser_uuid
+
+example
+201 | "Guest" | {216641EC-916D-415F-B00B-AD14C4AE4E40}
+
+
+
+multiuser status (type 202)
+----
+
+int | int
+type | status
+
+example
+202 | 0
+
+
+
+multiuser link (type 203)
+----
+
+int | int | int | uuid | ...
+type | ? | linkID | linkUUID | ...
+
+
+
+multiuser network (type 210)
+----
+
+int | string
+type | network_name
+
+example
+210 | "Peer0"
