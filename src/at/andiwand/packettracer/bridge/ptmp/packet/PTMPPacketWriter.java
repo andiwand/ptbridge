@@ -1,0 +1,134 @@
+package at.andiwand.packettracer.bridge.ptmp.packet;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.ZipOutputStream;
+
+import at.andiwand.library.io.XOROutputStream;
+import at.andiwand.packettracer.bridge.ptmp.PTMPCompression;
+import at.andiwand.packettracer.bridge.ptmp.PTMPConfiguration;
+import at.andiwand.packettracer.bridge.ptmp.PTMPDataOutputStream;
+import at.andiwand.packettracer.bridge.ptmp.PTMPEncoding;
+import at.andiwand.packettracer.bridge.ptmp.PTMPEncryption;
+
+
+// TODO fix compression
+public class PTMPPacketWriter {
+	
+	private PTMPEncoding encoding;
+	private PTMPEncryption encryption;
+	private PTMPCompression compression;
+	
+	private PTMPDataOutputStream dataOutputStream;
+	
+	private byte[] encryptionKey;
+	
+	public PTMPPacketWriter(OutputStream outputStream) {
+		this(outputStream, PTMPConfiguration.DEFAULT);
+	}
+	
+	public PTMPPacketWriter(OutputStream outputStream, PTMPEncoding encoding,
+			PTMPEncryption encryption, PTMPCompression compression) {
+		this.encoding = encoding;
+		this.encryption = encryption;
+		this.compression = compression;
+		
+		BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+				outputStream);
+		dataOutputStream = new PTMPDataOutputStream(bufferedOutputStream,
+				encoding);
+	}
+	
+	public PTMPPacketWriter(OutputStream outputStream,
+			PTMPConfiguration configuration) {
+		this(outputStream, configuration.getEncoding(), configuration
+				.getEncryption(), configuration.getCompression());
+	}
+	
+	public PTMPEncoding getEncoding() {
+		return encoding;
+	}
+	
+	public PTMPEncryption getEncryption() {
+		return encryption;
+	}
+	
+	public PTMPCompression getCompression() {
+		return compression;
+	}
+	
+	public byte[] getEncryptionKey() {
+		return encryptionKey;
+	}
+	
+	public void setEncoding(PTMPEncoding encoding) {
+		this.encoding = encoding;
+		
+		dataOutputStream.setEncoding(encoding);
+	}
+	
+	public void setEncryption(PTMPEncryption encryption) {
+		this.encryption = encryption;
+	}
+	
+	public void setCompression(PTMPCompression compression) {
+		this.compression = compression;
+	}
+	
+	public void setConfiguration(PTMPEncoding encoding,
+			PTMPEncryption encryption, PTMPCompression compression) {
+		setEncoding(encoding);
+		setEncryption(encryption);
+		setCompression(compression);
+	}
+	
+	public void setConfiguration(PTMPConfiguration configuration) {
+		setConfiguration(configuration.getEncoding(), configuration
+				.getEncryption(), configuration.getCompression());
+	}
+	
+	public void setEncryptionKey(byte[] encryptionKey) {
+		this.encryptionKey = encryptionKey;
+	}
+	
+	public void writePacket(PTMPPacket packet) throws IOException {
+		byte[] data = packet.getBytes(encoding);
+		
+		ByteArrayOutputStream packetOutputStream = new ByteArrayOutputStream();
+		OutputStream outputStream = packetOutputStream;
+		
+		switch (encryption) {
+		case NONE:
+			break;
+		case XOR:
+			outputStream = new XOROutputStream(outputStream, encryptionKey);
+			break;
+		
+		default:
+			throw new IllegalStateException("Unreachable section");
+		}
+		
+		switch (compression) {
+		case NO:
+			break;
+		case ZLIB_DEFAULT:
+			outputStream = new ZipOutputStream(outputStream);
+			break;
+		
+		default:
+			throw new IllegalStateException("Unreachable section");
+		}
+		
+		outputStream.write(data);
+		byte[] packetBytes = packetOutputStream.toByteArray();
+		
+		synchronized (this) {
+			dataOutputStream.writeInt(packetBytes.length);
+			dataOutputStream.write(packetBytes);
+			dataOutputStream.flush();
+		}
+	}
+	
+}
