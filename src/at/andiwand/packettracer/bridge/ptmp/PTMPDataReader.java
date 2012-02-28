@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import at.andiwand.library.network.ip.IPv4Address;
 import at.andiwand.library.network.mac.MACAddress;
+import at.andiwand.packettracer.bridge.ptmp.packet.PTMPEncodedPacket;
 
 
 public class PTMPDataReader extends InputStream {
@@ -22,12 +23,7 @@ public class PTMPDataReader extends InputStream {
 	private PTMPDataInputStream dataInputStream;
 	
 	public PTMPDataReader(byte[] data, PTMPEncoding encoding) {
-		this.data = data;
-		offset = 0;
-		length = data.length;
-		this.encoding = encoding;
-		
-		reset();
+		this(data, 0, data.length, encoding);
 	}
 	
 	public PTMPDataReader(byte[] data, int offset, int length,
@@ -38,6 +34,10 @@ public class PTMPDataReader extends InputStream {
 		this.encoding = encoding;
 		
 		reset();
+	}
+	
+	public PTMPDataReader(PTMPEncodedPacket packet) {
+		this(packet.getBytes(), packet.getEncoding());
 	}
 	
 	public byte[] getData() {

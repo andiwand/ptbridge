@@ -10,7 +10,7 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPEncoding;
 import at.andiwand.packettracer.bridge.ptmp.PTMPEncryption;
 
 
-public class TestPTMPConnection {
+public class PTMPConnectionTest {
 	
 	public static void main(String[] args) throws Throwable {
 		PTMPConnection ptmpConnection = new PTMPConnection();

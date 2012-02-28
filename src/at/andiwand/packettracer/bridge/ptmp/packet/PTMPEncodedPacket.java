@@ -1,5 +1,7 @@
 package at.andiwand.packettracer.bridge.ptmp.packet;
 
+import java.util.Arrays;
+
 import at.andiwand.packettracer.bridge.ptmp.PTMPConfiguration;
 import at.andiwand.packettracer.bridge.ptmp.PTMPDataReader;
 import at.andiwand.packettracer.bridge.ptmp.PTMPDataWriter;
@@ -14,7 +16,7 @@ public class PTMPEncodedPacket extends PTMPPacket {
 	public PTMPEncodedPacket(int type, byte[] value, PTMPEncoding encoding) {
 		super(type);
 		
-		this.value = value;
+		this.value = Arrays.copyOf(value, value.length);
 		this.encoding = encoding;
 	}
 	
@@ -24,7 +26,7 @@ public class PTMPEncodedPacket extends PTMPPacket {
 	}
 	
 	public byte[] getValue() {
-		return value;
+		return Arrays.copyOf(value, value.length);
 	}
 	
 	public PTMPEncoding getEncoding() {
@@ -33,7 +35,7 @@ public class PTMPEncodedPacket extends PTMPPacket {
 	
 	public void getValue(PTMPDataWriter writer) {
 		if (writer.getEncoding() != encoding)
-			throw new IllegalArgumentException("Illegal encoding");
+			throw new IllegalArgumentException("Illegal encoding!");
 		
 		writer.write(value);
 	}

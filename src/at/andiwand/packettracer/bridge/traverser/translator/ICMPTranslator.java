@@ -8,7 +8,7 @@ public class ICMPTranslator extends
 		GenericPDUTranslator<ICMPPacket, MultiuserICMPPacket> {
 	
 	@Override
-	protected MultiuserICMPPacket translateGeneric(ICMPPacket packet) {
+	protected MultiuserICMPPacket toMultiuserGeneric(ICMPPacket packet) {
 		MultiuserICMPPacket result;
 		
 		if (packet instanceof ICMPPacket.Echo) {
@@ -29,7 +29,7 @@ public class ICMPTranslator extends
 	}
 	
 	@Override
-	protected ICMPPacket translateGeneric(MultiuserICMPPacket packet) {
+	protected ICMPPacket toNetworkGeneric(MultiuserICMPPacket packet) {
 		ICMPPacket result;
 		
 		if (packet instanceof MultiuserICMPPacket.Echo) {

@@ -15,25 +15,26 @@ import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserUDPSegment;
 public class IPv4Translator extends
 		GenericPDUTranslator<IPv4Packet, MultiuserIPv4Packet> {
 	
-	private static final TranslationAssociator TRANSLATION_ASSOCIATOR = new TranslationAssociator();
-	
-	static {
-		TRANSLATION_ASSOCIATOR.putTranslator(ICMPPacket.class,
-				MultiuserICMPPacket.class, ICMPTranslator.class);
-		TRANSLATION_ASSOCIATOR.putTranslator(TCPSegment.class,
-				MultiuserTCPSegment.class, TCPTranslator.class);
-		TRANSLATION_ASSOCIATOR.putTranslator(UDPSegment.class,
-				MultiuserUDPSegment.class, UDPTranslator.class);
-	}
+	private static final TranslationHelper TRANSLATION_ASSOCIATOR = new TranslationHelper() {
+		{
+			putTranslator(ICMPPacket.class, MultiuserICMPPacket.class,
+					ICMPTranslator.class);
+			putTranslator(TCPSegment.class, MultiuserTCPSegment.class,
+					TCPTranslator.class);
+			putTranslator(UDPSegment.class, MultiuserUDPSegment.class,
+					UDPTranslator.class);
+		}
+	};
 	
 	@Override
-	protected MultiuserIPv4Packet translateGeneric(IPv4Packet packet) {
+	protected MultiuserIPv4Packet toMultiuserGeneric(IPv4Packet packet) {
 		MultiuserIPv4Packet result = new MultiuserIPv4Packet();
 		
 		Class<?> payloadClass = packet.getPayload().getClass();
 		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-				.getTranslatorInstance(payloadClass);
-		MultiuserPDU payload = payloadTranslator.translate(packet.getPayload());
+				.getTranslator(payloadClass);
+		MultiuserPDU payload = payloadTranslator.toMultiuser(packet
+				.getPayload());
 		result.setPayload(payload);
 		
 		result.setVersion(packet.getVersion());
@@ -52,7 +53,7 @@ public class IPv4Translator extends
 	}
 	
 	@Override
-	protected IPv4Packet translateGeneric(MultiuserIPv4Packet packet) {
+	protected IPv4Packet toNetworkGeneric(MultiuserIPv4Packet packet) {
 		IPv4Packet result = new IPv4Packet();
 		
 		result.setVersion(packet.getVersion());
@@ -67,8 +68,8 @@ public class IPv4Translator extends
 		
 		Class<?> payloadClass = packet.getPayload().getClass();
 		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-				.getTranslatorInstance(payloadClass);
-		PDU payload = payloadTranslator.translate(packet.getPayload());
+				.getTranslator(payloadClass);
+		PDU payload = payloadTranslator.toNetwork(packet.getPayload());
 		result.setPayload(payload);
 		
 		return result;

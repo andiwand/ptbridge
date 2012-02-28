@@ -9,18 +9,18 @@ public abstract class GenericPDUTranslator<T1 extends PDU, T2 extends MultiuserP
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public T1 translate(MultiuserPDU pdu) {
-		return translateGeneric((T2) pdu);
+	public T1 toNetwork(MultiuserPDU pdu) {
+		return toNetworkGeneric((T2) pdu);
 	}
 	
-	protected abstract T1 translateGeneric(T2 pdu);
+	protected abstract T1 toNetworkGeneric(T2 pdu);
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public T2 translate(PDU pdu) {
-		return translateGeneric((T1) pdu);
+	public T2 toMultiuser(PDU pdu) {
+		return toMultiuserGeneric((T1) pdu);
 	}
 	
-	protected abstract T2 translateGeneric(T1 pdu);
+	protected abstract T2 toMultiuserGeneric(T1 pdu);
 	
 }

@@ -72,14 +72,14 @@ public class PTMPNegotiationPacket extends PTMPPacket {
 		public static PTMPEncryption decode(int rawEncryption) {
 			PTMPEncryption result = decodingMap.get(rawEncryption);
 			if (result == null)
-				throw new IllegalStateException("Unsupported encoding!");
+				throw new IllegalStateException("Unsupported encryption!");
 			return result;
 		}
 		
 		public static int encode(PTMPEncryption encryption) {
 			Integer result = encodingMap.get(encryption);
 			if (result == null)
-				throw new IllegalStateException("Unsupported encoding!");
+				throw new IllegalStateException("Unsupported encryption!");
 			return result;
 		}
 		

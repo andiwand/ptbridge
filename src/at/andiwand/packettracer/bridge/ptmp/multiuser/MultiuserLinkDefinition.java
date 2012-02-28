@@ -1,60 +1,15 @@
 package at.andiwand.packettracer.bridge.ptmp.multiuser;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 
 public class MultiuserLinkDefinition {
 	
-	public static final int TYPE_NONE = 0;
-	public static final int TYPE_STRAIGHT_THROUGH = 1;
-	public static final int TYPE_CROSS_OVER = 2;
-	public static final int TYPE_CONSOLE = 3;
-	public static final int TYPE_FIBER = 4;
-	public static final int TYPE_SERIAL = 5;
-	public static final int TYPE_PHONE = 6;
-	public static final int TYPE_COAXIAL = 7;
-	public static final Set<Integer> TYPE_SET = Collections
-			.unmodifiableSet(new HashSet<Integer>(Arrays.asList(TYPE_NONE,
-					TYPE_STRAIGHT_THROUGH, TYPE_CROSS_OVER, TYPE_CONSOLE,
-					TYPE_FIBER, TYPE_SERIAL, TYPE_PHONE, TYPE_COAXIAL)));
-	
-	public static final int INTERFACE_CONSOLE = 0;
-	public static final int INTERFACE_COPPER_ETHERNET = 2;
-	public static final int INTERFACE_COPPER_FAST_ETHERNET = 3;
-	public static final int INTERFACE_COPPER_GIGABIT_ETHERNET = 4;
-	public static final int INTERFACE_FIBER_FAST_ETHERNET = 5;
-	public static final int INTERFACE_FIBER_GIGABIT_ETHERNET = 6;
-	public static final int INTERFACE_SERIAL_BIG = 7;
-	public static final int INTERFACE_SERIAL = 8;
-	public static final int INTERFACE_ANALOG_PHONE = 18;
-	public static final int INTERFACE_COAXIAL = 21;
-	public static final Set<Integer> INTERFACE_SET = Collections
-			.unmodifiableSet(new HashSet<Integer>(Arrays
-					.asList(INTERFACE_CONSOLE, INTERFACE_COPPER_ETHERNET,
-							INTERFACE_COPPER_FAST_ETHERNET,
-							INTERFACE_COPPER_GIGABIT_ETHERNET,
-							INTERFACE_FIBER_FAST_ETHERNET,
-							INTERFACE_FIBER_GIGABIT_ETHERNET,
-							INTERFACE_SERIAL_BIG, INTERFACE_SERIAL,
-							INTERFACE_ANALOG_PHONE, INTERFACE_COAXIAL)));
-	
-	public static boolean legalType(int type) {
-		return TYPE_SET.contains(type);
-	}
-	
-	public static boolean legalInterfaceType(int interfaceType) {
-		return INTERFACE_SET.contains(interfaceType);
-	}
-	
 	private final UUID uuid;
-	private int type;
+	private MultiuserLinkType type;
 	
-	private int interfaceType;
-	private String interfaceName = "";
+	private MultiuserInterfaceType interfaceType;
+	private String interfaceName;
 	private boolean interfaceUp;
 	private boolean interfaceCrossing;
 	
@@ -77,7 +32,8 @@ public class MultiuserLinkDefinition {
 	}
 	
 	public MultiuserLinkDefinition(String interfaceName) {
-		uuid = UUID.nameUUIDFromBytes(interfaceName.getBytes());
+		this(UUID.nameUUIDFromBytes(interfaceName.getBytes()));
+		
 		this.interfaceName = interfaceName;
 	}
 	
@@ -99,11 +55,11 @@ public class MultiuserLinkDefinition {
 		return uuid;
 	}
 	
-	public int getType() {
+	public MultiuserLinkType getType() {
 		return type;
 	}
 	
-	public int getInterfaceType() {
+	public MultiuserInterfaceType getInterfaceType() {
 		return interfaceType;
 	}
 	
@@ -147,17 +103,11 @@ public class MultiuserLinkDefinition {
 		return deviceUp;
 	}
 	
-	public void setType(int type) {
-		if (!legalType(type))
-			throw new IllegalArgumentException("Illegal type");
-		
+	public void setType(MultiuserLinkType type) {
 		this.type = type;
 	}
 	
-	public void setInterfaceType(int interfaceType) {
-		if (!legalInterfaceType(interfaceType))
-			throw new IllegalArgumentException("Illegal interface type");
-		
+	public void setInterfaceType(MultiuserInterfaceType interfaceType) {
 		this.interfaceType = interfaceType;
 	}
 	

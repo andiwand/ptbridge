@@ -40,6 +40,7 @@ public class MultiuserNetworkNamePacket extends MultiuserPacket {
 		return networkName;
 	}
 	
+	@Override
 	public void getValue(PTMPDataWriter writer) {
 		writer.writeString(networkName);
 	}
@@ -48,11 +49,13 @@ public class MultiuserNetworkNamePacket extends MultiuserPacket {
 		this.networkName = networkName;
 	}
 	
+	@Override
 	public void parseValue(PTMPDataReader reader) {
 		networkName = reader.readString();
 	}
 	
-	protected boolean legalType2(int type) {
+	@Override
+	protected boolean legalType(int type) {
 		return type == TYPE;
 	}
 	

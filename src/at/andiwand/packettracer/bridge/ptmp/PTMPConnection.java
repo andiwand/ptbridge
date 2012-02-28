@@ -156,7 +156,8 @@ public class PTMPConnection {
 		
 		setState(PTMPState.CONNECTING);
 		
-		connect(new Socket(address, port), username, password);
+		Socket socket = new Socket(address, port);
+		connect(socket, username, password);
 	}
 	
 	public void connect(Socket socket, String password) throws IOException {

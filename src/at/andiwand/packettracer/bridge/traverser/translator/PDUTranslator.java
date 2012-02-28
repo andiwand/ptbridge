@@ -6,8 +6,8 @@ import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserPDU;
 
 public abstract class PDUTranslator {
 	
-	public abstract PDU translate(MultiuserPDU pdu);
+	public abstract PDU toNetwork(MultiuserPDU pdu);
 	
-	public abstract MultiuserPDU translate(PDU pdu);
+	public abstract MultiuserPDU toMultiuser(PDU pdu);
 	
 }

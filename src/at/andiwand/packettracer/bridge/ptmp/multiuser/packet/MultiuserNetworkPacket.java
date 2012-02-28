@@ -4,8 +4,8 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPDataReader;
 import at.andiwand.packettracer.bridge.ptmp.PTMPDataWriter;
 import at.andiwand.packettracer.bridge.ptmp.PTMPEncoding;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserEthernet2Frame;
-import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserPayloadAssociator;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserPDU;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserPayloadAssociator;
 import at.andiwand.packettracer.bridge.ptmp.packet.PTMPEncodedPacket;
 
 
@@ -68,6 +68,7 @@ public class MultiuserNetworkPacket extends MultiuserPacket {
 		return payload;
 	}
 	
+	@Override
 	public void getValue(PTMPDataWriter writer) {
 		writer.writeInt(random);
 		writer.writeInt(linkId);
@@ -90,16 +91,21 @@ public class MultiuserNetworkPacket extends MultiuserPacket {
 		this.payload = payload;
 	}
 	
+	@Override
 	public void parseValue(PTMPDataReader reader) {
 		random = reader.readInt();
 		linkId = reader.readInt();
 		
+		System.out
+				.println(new String(reader.getData()).replaceAll("\0", " | "));
+		
 		String payloadName = reader.readString();
 		payload = PAYLOAD_ASSOCIATOR.getPayloadInstance(payloadName);
-		payload.parse(reader);
+		if (payload != null) payload.parse(reader);
 	}
 	
-	protected boolean legalType2(int type) {
+	@Override
+	protected boolean legalType(int type) {
 		return type == TYPE;
 	}
 	

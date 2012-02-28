@@ -13,7 +13,7 @@ import at.andiwand.packettracer.bridge.ptmp.packet.PTMPPacketReader;
 import at.andiwand.packettracer.bridge.ptmp.packet.PTMPPacketWriter;
 
 
-public class TestPTMPReaderWriter {
+public class PTMPReaderWriterTest {
 	
 	public static void main(String[] args) throws Throwable {
 		PTMPConfiguration configuration = new PTMPConfiguration(

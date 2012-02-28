@@ -11,7 +11,7 @@ import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserUDPSegment;
 public class UDPTranslator extends
 		GenericPDUTranslator<UDPSegment, MultiuserUDPSegment> {
 	
-	private static final TranslationAssociator TRANSLATION_ASSOCIATOR = new TranslationAssociator();
+	private static final TranslationHelper TRANSLATION_ASSOCIATOR = new TranslationHelper();
 	
 	static {
 		TRANSLATION_ASSOCIATOR.putTranslator(DHCPPacket.class,
@@ -19,14 +19,14 @@ public class UDPTranslator extends
 	}
 	
 	@Override
-	protected MultiuserUDPSegment translateGeneric(UDPSegment segment) {
+	protected MultiuserUDPSegment toMultiuserGeneric(UDPSegment segment) {
 		MultiuserUDPSegment result = new MultiuserUDPSegment();
 		
 		Class<?> payloadClass = segment.getPayload().getClass();
 		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-				.getTranslatorInstance(payloadClass);
+				.getTranslator(payloadClass);
 		MultiuserPDU payload = payloadTranslator
-				.translate(segment.getPayload());
+				.toMultiuser(segment.getPayload());
 		result.setPayload(payload);
 		
 		result.setSourcePort((short) segment.getSourcePort());
@@ -36,7 +36,7 @@ public class UDPTranslator extends
 	}
 	
 	@Override
-	protected UDPSegment translateGeneric(MultiuserUDPSegment segment) {
+	protected UDPSegment toNetworkGeneric(MultiuserUDPSegment segment) {
 		UDPSegment result = new UDPSegment();
 		
 		result.setSourcePort(segment.getSourcePort());
@@ -44,8 +44,8 @@ public class UDPTranslator extends
 		
 		Class<?> payloadClass = segment.getPayload().getClass();
 		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-				.getTranslatorInstance(payloadClass);
-		PDU payload = payloadTranslator.translate(segment.getPayload());
+				.getTranslator(payloadClass);
+		PDU payload = payloadTranslator.toNetwork(segment.getPayload());
 		result.setPayload(payload);
 		
 		return null;

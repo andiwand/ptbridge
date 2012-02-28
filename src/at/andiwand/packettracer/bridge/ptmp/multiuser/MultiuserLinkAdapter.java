@@ -27,7 +27,7 @@ public class MultiuserLinkAdapter {
 			synchronized (packetQueue) {
 				if (packetQueue.isEmpty()) packetQueue.wait();
 				
-				if (closed) throw new IOException("Link is already closed");
+				if (closed) throw new IOException("Link is already closed!");
 				
 				return packetQueue.poll();
 			}
@@ -37,11 +37,10 @@ public class MultiuserLinkAdapter {
 	}
 	
 	public void send(MultiuserPDU packet) throws IOException {
-		if (closed) throw new IOException("Link is already closed");
+		if (closed) throw new IOException("Link is already closed!");
 		
 		MultiuserNetworkPacket networkPacket = new MultiuserNetworkPacket(
 				linkId, packet);
-		
 		multiuserConnection.send(networkPacket);
 	}
 	

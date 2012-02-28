@@ -49,7 +49,8 @@ public class MultiuserInitialisationPacket extends MultiuserPacket {
 	public UUID getUuid() {
 		return uuid;
 	}
-	
+
+	@Override
 	public void getValue(PTMPDataWriter writer) {
 		writer.writeString(username);
 		writer.writeUuid(uuid);
@@ -62,13 +63,14 @@ public class MultiuserInitialisationPacket extends MultiuserPacket {
 	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
-	
+
+	@Override
 	public void parseValue(PTMPDataReader reader) {
 		username = reader.readString();
 		uuid = reader.readUuid();
 	}
 	
-	protected boolean legalType2(int type) {
+	protected boolean legalType(int type) {
 		return (type == TYPE_REQUEST) || (type == TYPE_RESPONSE);
 	}
 	

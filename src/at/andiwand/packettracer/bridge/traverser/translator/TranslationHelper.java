@@ -7,13 +7,14 @@ import at.andiwand.packetsocket.pdu.PDU;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserPDU;
 
 
-public class TranslationAssociator {
+public class TranslationHelper {
 	
 	private final Map<Class<?>, Class<? extends PDUTranslator>> translatorMap = new HashMap<Class<?>, Class<? extends PDUTranslator>>();
+	private final Map<Class<?>, PDUTranslator> translatorInstanceMap = new HashMap<Class<?>, PDUTranslator>();
 	
-	public TranslationAssociator() {}
+	public TranslationHelper() {}
 	
-	public TranslationAssociator(TranslationAssociator translationAssociator) {
+	public TranslationHelper(TranslationHelper translationAssociator) {
 		translatorMap.putAll(translationAssociator.translatorMap);
 	}
 	
@@ -21,13 +22,19 @@ public class TranslationAssociator {
 		return translatorMap.get(clazz);
 	}
 	
-	public PDUTranslator getTranslatorInstance(Class<?> clazz) {
+	public PDUTranslator getTranslator(Class<?> clazz) {
 		Class<? extends PDUTranslator> translatorClass = getTranslatorClass(clazz);
-		
 		if (translatorClass == null) return null;
 		
 		try {
-			return translatorClass.newInstance();
+			PDUTranslator result = translatorInstanceMap.get(translatorClass);
+			
+			if (result == null) {
+				result = translatorClass.newInstance();
+				translatorInstanceMap.put(translatorClass, result);
+			}
+			
+			return result;
 		} catch (Exception e) {
 			throw new IllegalStateException("Unreachable section");
 		}

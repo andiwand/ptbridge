@@ -11,6 +11,7 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <javaElement handleIdentifier="=packetsocket/native"/>
         <javaElement handleIdentifier="=packetsocket/src"/>
     </selectedElements>
 </jardesc>

@@ -36,7 +36,7 @@ public class DHCPTranslator extends
 	}
 	
 	@Override
-	protected MultiuserDHCPPacket translateGeneric(DHCPPacket packet) {
+	protected MultiuserDHCPPacket toMultiuserGeneric(DHCPPacket packet) {
 		byte messageType = 0;
 		String transactionId = Integer.toHexString(packet.getTransactionId());
 		IPv4Address gatewayAddress = IPv4Address.EMPTY;
@@ -90,7 +90,7 @@ public class DHCPTranslator extends
 	}
 	
 	@Override
-	protected DHCPPacket translateGeneric(MultiuserDHCPPacket packet) {
+	protected DHCPPacket toNetworkGeneric(MultiuserDHCPPacket packet) {
 		byte operation = OPERATION_ASSOCIATION_MAP.get(packet.getMessageType());
 		int transactionId = Integer.parseInt(packet.getTransactionId(), 16);
 		

@@ -19,7 +19,7 @@ public abstract class MultiuserPacket extends PTMPPacket {
 	public static final int TYPE_NETWORK_NAME = 210;
 	
 	public static boolean legalMultiuserType(int type) {
-		return ((type >= TYPE_MIN) && (type <= TYPE_MAX));
+		return (type >= TYPE_MIN) && (type <= TYPE_MAX);
 	}
 	
 	public MultiuserPacket(int type) {
@@ -41,11 +41,5 @@ public abstract class MultiuserPacket extends PTMPPacket {
 	public MultiuserPacket(PTMPPacket packet) {
 		super(packet);
 	}
-	
-	protected final boolean legalType(int type) {
-		return legalMultiuserType(type) && legalType2(type);
-	}
-	
-	protected abstract boolean legalType2(int type);
 	
 }

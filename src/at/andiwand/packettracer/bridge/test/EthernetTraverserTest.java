@@ -12,12 +12,14 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPEncryption;
 import at.andiwand.packettracer.bridge.ptmp.PTMPState;
 import at.andiwand.packettracer.bridge.ptmp.PTMPStateListener;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserConnection;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserInterfaceType;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkAdapter;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkDefinition;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkType;
 import at.andiwand.packettracer.bridge.traverser.EthernetTraverser;
 
 
-public class TestEthernetTraverser {
+public class EthernetTraverserTest {
 	
 	public static void main(String[] args) throws Throwable {
 		EthernetSocket ethernetSocket = new EthernetSocket(
@@ -29,19 +31,19 @@ public class TestEthernetTraverser {
 		ptmpConnection.setPreferredConfiguration(new PTMPConfiguration(
 				PTMPEncoding.TEXT, PTMPEncryption.NONE, PTMPCompression.NO,
 				PTMPAuthentication.CLEAR_TEXT, 0));
-		ptmpConnection.connect(InetAddress.getLocalHost(), "Ethernet Bridge",
-				"");
+		ptmpConnection.connect(InetAddress.getByName("127.0.0.1"),
+				"PacketTracer Bridge", "");
 		MultiuserConnection multiuserConnection = new MultiuserConnection(
-				"Ethernet Bridge");
+				"Ethernet");
 		MultiuserLinkDefinition linkDefinition = new MultiuserLinkDefinition(
-				"Ethernet Bridge");
-		linkDefinition.setType(MultiuserLinkDefinition.TYPE_STRAIGHT_THROUGH);
+				"Ethernet Bridge Interface");
+		linkDefinition.setType(MultiuserLinkType.STRAIGHT_THROUGH);
 		linkDefinition.setBandwidth(10000);
 		linkDefinition.setFullDuplex(true);
 		linkDefinition.setAutoBandwidth(true);
 		linkDefinition.setAutoDuplex(true);
 		linkDefinition
-				.setInterfaceType(MultiuserLinkDefinition.INTERFACE_COPPER_FAST_ETHERNET);
+				.setInterfaceType(MultiuserInterfaceType.COPPER_FAST_ETHERNET);
 		linkDefinition.setInterfaceCrossing(false);
 		linkDefinition.setInterfaceUp(true);
 		linkDefinition.setDeviceUp(true);

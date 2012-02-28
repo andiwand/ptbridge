@@ -1,44 +1,156 @@
 package at.andiwand.packettracer.bridge.ptmp.multiuser.packet;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import at.andiwand.packettracer.bridge.ptmp.PTMPDataReader;
 import at.andiwand.packettracer.bridge.ptmp.PTMPDataWriter;
 import at.andiwand.packettracer.bridge.ptmp.PTMPEncoding;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserInterfaceType;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkDefinition;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkType;
 import at.andiwand.packettracer.bridge.ptmp.packet.PTMPEncodedPacket;
 
 
 public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 	
-	public static final int TYPE = TYPE_LINK_DEFINITION;
-	
-	public static final int CHANGE_TYPE_NEW = 0;
-	public static final int CHANGE_TYPE_OLD = 1;
-	public static final int CHANGE_TYPE_DETACH = 2;
-	public static final int CHANGE_TYPE_REMOVE = 3;
-	public static final Set<Integer> CHANGE_TYPE_SET = Collections
-			.unmodifiableSet(new HashSet<Integer>(Arrays.asList(
-					CHANGE_TYPE_NEW, CHANGE_TYPE_OLD, CHANGE_TYPE_DETACH,
-					CHANGE_TYPE_REMOVE)));
-	
-	public static boolean legalChangeType(int changeType) {
-		return CHANGE_TYPE_SET.contains(changeType);
+	private static enum LinkTypeTranslator {
+		NONE(0, MultiuserLinkType.NONE),
+		STRAIGHT_THROUGH(1, MultiuserLinkType.STRAIGHT_THROUGH),
+		CROSS_OVER(2, MultiuserLinkType.CROSS_OVER),
+		CONSOLE(3, MultiuserLinkType.CONSOLE),
+		FIBER(4, MultiuserLinkType.FIBER),
+		SERIAL(5, MultiuserLinkType.SERIAL),
+		PHONE(6, MultiuserLinkType.PHONE),
+		COAXIAL(7, MultiuserLinkType.COAXIAL);
+		
+		private static final Map<Integer, MultiuserLinkType> decodingMap = new HashMap<Integer, MultiuserLinkType>();
+		private static final Map<MultiuserLinkType, Integer> encodingMap = new HashMap<MultiuserLinkType, Integer>();
+		
+		static {
+			for (LinkTypeTranslator translator : values()) {
+				decodingMap.put(translator.rawLinkType, translator.linkType);
+				encodingMap.put(translator.linkType, translator.rawLinkType);
+			}
+		}
+		
+		public static MultiuserLinkType decode(int rawLinkType) {
+			MultiuserLinkType result = decodingMap.get(rawLinkType);
+			if (result == null)
+				throw new IllegalStateException("Unsupported link type!");
+			return result;
+		}
+		
+		public static int encode(MultiuserLinkType linkType) {
+			Integer result = encodingMap.get(linkType);
+			if (result == null)
+				throw new IllegalStateException("Unsupported link type!");
+			return result;
+		}
+		
+		private final int rawLinkType;
+		private final MultiuserLinkType linkType;
+		
+		private LinkTypeTranslator(int rawLinkType, MultiuserLinkType linkType) {
+			this.rawLinkType = rawLinkType;
+			this.linkType = linkType;
+		}
 	}
 	
-	private int changeType;
+	private static enum InterfaceTypeTranslator {
+		CONSOLE(0, MultiuserInterfaceType.CONSOLE),
+		COPPER_ETHERNET(2, MultiuserInterfaceType.COPPER_ETHERNET),
+		COPPER_FAST_ETHERNET(3, MultiuserInterfaceType.COPPER_FAST_ETHERNET),
+		COPPER_GIGABIT_ETHERNET(4,
+				MultiuserInterfaceType.COPPER_GIGABIT_ETHERNET),
+		FIBER_FAST_ETHERNET(5, MultiuserInterfaceType.FIBER_FAST_ETHERNET),
+		FIBER_GIGABIT_ETHERNET(6,
+				MultiuserInterfaceType.COPPER_GIGABIT_ETHERNET),
+		SERIAL_BIG(7, MultiuserInterfaceType.SERIAL_BIG),
+		SERIAL(8, MultiuserInterfaceType.SERIAL),
+		ANALOG_PHONE(18, MultiuserInterfaceType.ANALOG_PHONE),
+		COAXIAL(21, MultiuserInterfaceType.COAXIAL);
+		
+		private static final Map<Integer, MultiuserInterfaceType> decodingMap = new HashMap<Integer, MultiuserInterfaceType>();
+		private static final Map<MultiuserInterfaceType, Integer> encodingMap = new HashMap<MultiuserInterfaceType, Integer>();
+		
+		static {
+			for (InterfaceTypeTranslator translator : values()) {
+				decodingMap.put(translator.rawInterfaceType,
+						translator.interfaceType);
+				encodingMap.put(translator.interfaceType,
+						translator.rawInterfaceType);
+			}
+		}
+		
+		public static MultiuserInterfaceType decode(int rawInterfaceType) {
+			MultiuserInterfaceType result = decodingMap.get(rawInterfaceType);
+			if (result == null)
+				throw new IllegalStateException("Unsupported interface type!");
+			return result;
+		}
+		
+		public static int encode(MultiuserInterfaceType interfaceType) {
+			Integer result = encodingMap.get(interfaceType);
+			if (result == null)
+				throw new IllegalStateException("Unsupported interface type!");
+			return result;
+		}
+		
+		private final int rawInterfaceType;
+		private final MultiuserInterfaceType interfaceType;
+		
+		private InterfaceTypeTranslator(int rawInterfaceType,
+				MultiuserInterfaceType interfaceType) {
+			this.rawInterfaceType = rawInterfaceType;
+			this.interfaceType = interfaceType;
+		}
+	}
+	
+	public static enum ChangeType {
+		NEW(0),
+		OLD(1),
+		DETACH(2),
+		REMOVE(3);
+		
+		private static final Map<Integer, ChangeType> decodingMap = new HashMap<Integer, ChangeType>();
+		
+		static {
+			for (ChangeType translator : values()) {
+				decodingMap.put(translator.rawChangeType, translator);
+			}
+		}
+		
+		public static ChangeType decode(int rawChangeType) {
+			ChangeType result = decodingMap.get(rawChangeType);
+			if (result == null)
+				throw new IllegalStateException("Unsupported encoding!");
+			return result;
+		}
+		
+		public static int encode(ChangeType changeType) {
+			return changeType.rawChangeType;
+		}
+		
+		private int rawChangeType;
+		
+		private ChangeType(int rawChangeType) {
+			this.rawChangeType = rawChangeType;
+		}
+	}
+	
+	public static final int TYPE = TYPE_LINK_DEFINITION;
+	
+	private ChangeType changeType;
 	private int linkId;
 	
 	private MultiuserLinkDefinition definition;
 	
-	public MultiuserLinkDefinitionPacket(int changeType, int linkId,
+	public MultiuserLinkDefinitionPacket(ChangeType changeType, int linkId,
 			MultiuserLinkDefinition definition) {
 		super(TYPE);
 		
-		setChangeType(changeType);
+		this.changeType = changeType;
 		this.linkId = linkId;
 		this.definition = definition;
 	}
@@ -58,12 +170,12 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 	public MultiuserLinkDefinitionPacket(MultiuserLinkDefinitionPacket packet) {
 		super(packet);
 		
-		changeType = packet.changeType;
-		linkId = packet.linkId;
-		definition = packet.definition;
+		this.changeType = packet.changeType;
+		this.linkId = packet.linkId;
+		this.definition = packet.definition;
 	}
 	
-	public int getChangeType() {
+	public ChangeType getChangeType() {
 		return changeType;
 	}
 	
@@ -74,16 +186,18 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 	public MultiuserLinkDefinition getDefinition() {
 		return definition;
 	}
-	
+
+	@Override
 	public void getValue(PTMPDataWriter writer) {
 		writer.writeInt(0);
-		writer.writeInt(changeType);
+		writer.writeInt(ChangeType.encode(changeType));
 		writer.writeInt(linkId);
 		writer.writeUuid(definition.getUuid());
 		writer.writeInt(-1);
-		writer.writeInt(definition.getType());
+		writer.writeInt(LinkTypeTranslator.encode(definition.getType()));
 		writer.writeString(definition.getInterfaceName());
-		writer.writeInt(definition.getInterfaceType());
+		writer.writeInt(InterfaceTypeTranslator.encode(definition
+				.getInterfaceType()));
 		writer.writeBoolean(definition.isInterfaceUp());
 		writer.writeBoolean(definition.isInterfaceCrossing());
 		writer.writeBoolean(false);
@@ -101,10 +215,7 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 		writer.writeBoolean(definition.isDeviceUp());
 	}
 	
-	public void setChangeType(int changeType) {
-		if (!legalChangeType(changeType))
-			throw new IllegalArgumentException("Illegal change type");
-		
+	public void setChangeType(ChangeType changeType) {
 		this.changeType = changeType;
 	}
 	
@@ -116,15 +227,17 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 		this.definition = definition;
 	}
 	
+	@Override
 	public void parseValue(PTMPDataReader reader) {
 		reader.readInt();
-		changeType = reader.readInt();
+		changeType = ChangeType.decode(reader.readInt());
 		linkId = reader.readInt();
 		definition = new MultiuserLinkDefinition(reader.readUuid());
 		reader.readInt();
-		definition.setType(reader.readInt());
+		definition.setType(LinkTypeTranslator.decode(reader.readInt()));
 		definition.setInterfaceName(reader.readString());
-		definition.setInterfaceType(reader.readInt());
+		definition.setInterfaceType(InterfaceTypeTranslator.decode(reader
+				.readInt()));
 		definition.setInterfaceUp(reader.readBoolean());
 		definition.setInterfaceCrossing(reader.readBoolean());
 		reader.readBoolean();
@@ -142,7 +255,8 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 		definition.setDeviceUp(reader.readBoolean());
 	}
 	
-	protected boolean legalType2(int type) {
+	@Override
+	protected boolean legalType(int type) {
 		return type == TYPE;
 	}
 	

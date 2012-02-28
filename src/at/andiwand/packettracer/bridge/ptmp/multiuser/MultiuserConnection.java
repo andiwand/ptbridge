@@ -16,14 +16,70 @@ import at.andiwand.packettracer.bridge.ptmp.multiuser.packet.MultiuserNetworkNam
 import at.andiwand.packettracer.bridge.ptmp.multiuser.packet.MultiuserNetworkPacket;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.packet.MultiuserPacket;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.packet.MultiuserXYZPacket;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.packet.MultiuserLinkDefinitionPacket.ChangeType;
 import at.andiwand.packettracer.bridge.ptmp.packet.PTMPEncodedPacket;
 import at.andiwand.packettracer.bridge.ptmp.packet.PTMPPacket;
 
 
 public class MultiuserConnection {
 	
+	private static interface ConnectionManager extends MultiuserPacketListener {}
+	
 	public static final String DEFAULT_USERNAME = "";
 	public static final String DEFAULT_NETWORK_NAME = "Java Multiuser Connection";
+	
+	private class PacketListener implements PTMPPacketListener {
+		public void receivePacket(PTMPEncodedPacket packet) {
+			if ((packet.getType() < MultiuserPacket.TYPE_MIN)
+					|| (packet.getType() > MultiuserPacket.TYPE_MAX)) return;
+			
+			handlePacket(packet);
+		}
+	}
+	
+	private class ClientConnectionManager implements ConnectionManager {
+		public void receivePacket(PTMPEncodedPacket packet) {
+			try {
+				switch (packet.getType()) {
+				case MultiuserPacket.TYPE_INITIALISATION_RESPONSE:
+					// MultiuserInitialisationPacket initialisationResponse =
+					// new MultiuserInitialisationPacket(
+					// packet);
+					
+					MultiuserXYZPacket xyz = new MultiuserXYZPacket(0);
+					sendImpl(xyz);
+					
+					MultiuserNetworkNamePacket networkName = new MultiuserNetworkNamePacket(
+							MultiuserConnection.this.networkName);
+					sendImpl(networkName);
+					
+					break;
+				case MultiuserPacket.TYPE_XYZ:
+					synchronized (linkDefinitionMap) {
+						for (Map.Entry<Integer, MultiuserLinkDefinition> entry : linkDefinitionMap
+								.entrySet()) {
+							changeLink(ChangeType.NEW, entry.getKey(), entry
+									.getValue());
+						}
+						
+						connected = true;
+					}
+					
+					synchronized (connectionMonitor) {
+						connectionMonitor.notify();
+					}
+					
+					break;
+				}
+			} catch (IOException e) {
+				synchronized (connectionMonitor) {
+					connectionMonitor.notify();
+				}
+				
+				connectionError = e;
+			}
+		}
+	}
 	
 	private PTMPConnection ptmpConnection;
 	private PacketListener ptmpPacketListener;
@@ -97,11 +153,11 @@ public class MultiuserConnection {
 	public void setNetworkName(String networkName) throws IOException {
 		this.networkName = networkName;
 		
-		if (connected) {
-			MultiuserNetworkNamePacket network = new MultiuserNetworkNamePacket(
-					networkName);
-			sendImpl(network);
-		}
+		if (!connected) return;
+		
+		MultiuserNetworkNamePacket network = new MultiuserNetworkNamePacket(
+				networkName);
+		sendImpl(network);
 	}
 	
 	public void addPacketListener(MultiuserPacketListener packetListener) {
@@ -123,8 +179,7 @@ public class MultiuserConnection {
 			linkAdapterMap.put(linkId, new MultiuserLinkAdapter(this, linkId));
 			
 			if (connected) {
-				changeLink(MultiuserLinkDefinitionPacket.CHANGE_TYPE_NEW,
-						linkId, definition);
+				changeLink(ChangeType.NEW, linkId, definition);
 			}
 		}
 	}
@@ -147,7 +202,7 @@ public class MultiuserConnection {
 			
 			if (link == null) return;
 			
-			link.setType(MultiuserLinkDefinition.TYPE_NONE);
+			link.setType(MultiuserLinkType.NONE);
 			link.setInterfaceName("");
 			
 			linkDefinitionMap.remove(linkId);
@@ -156,13 +211,10 @@ public class MultiuserConnection {
 			linkAdapterMap.remove(linkId);
 			
 			if (connected) {
-				int changeType;
+				ChangeType changeType;
 				
-				if (remoteLinkDefinitionMap.containsKey(linkId)) {
-					changeType = MultiuserLinkDefinitionPacket.CHANGE_TYPE_DETACH;
-				} else {
-					changeType = MultiuserLinkDefinitionPacket.CHANGE_TYPE_REMOVE;
-				}
+				if (remoteLinkDefinitionMap.containsKey(linkId)) changeType = ChangeType.DETACH;
+				else changeType = ChangeType.REMOVE;
 				
 				changeLink(changeType, linkId, link);
 			}
@@ -208,22 +260,16 @@ public class MultiuserConnection {
 		
 		if (!connected) {
 			if (connectionError != null) throw connectionError;
-			
-			throw new IOException("Multiuser connection failed");
+			throw new IOException("Multiuser connection failed!");
 		}
 		
-		for (MultiuserLinkAdapter linkAdapter : linkAdapterMap.values()) {
+		for (MultiuserLinkAdapter linkAdapter : linkAdapterMap.values())
 			linkAdapter.connect();
-		}
 		
-		for (MultiuserLinkDefinitionPacket linkPacket : linkDefinitionPacketQueue) {
+		for (MultiuserLinkDefinitionPacket linkPacket : linkDefinitionPacketQueue)
 			fireLinkAdded(linkPacket.getLinkId(), linkPacket.getDefinition());
-		}
+		
 		linkDefinitionPacketQueue.clear();
-	}
-	
-	public void accept() throws IOException {
-		// TODO implement
 	}
 	
 	public void send(PTMPPacket packet) throws IOException {
@@ -234,7 +280,7 @@ public class MultiuserConnection {
 	
 	private void sendImpl(PTMPPacket packet) throws IOException {
 		if (!MultiuserPacket.legalMultiuserType(packet.getType()))
-			throw new IOException("Illegal type");
+			throw new IOException("Illegal packet type!");
 		
 		ptmpConnection.send(packet);
 	}
@@ -261,32 +307,28 @@ public class MultiuserConnection {
 			MultiuserLinkDefinition definition = linkPacket.getDefinition();
 			
 			switch (linkPacket.getChangeType()) {
-			case MultiuserLinkDefinitionPacket.CHANGE_TYPE_NEW:
-			case MultiuserLinkDefinitionPacket.CHANGE_TYPE_OLD:
+			case NEW:
+			case OLD:
 				if (connected) {
-					if (remoteLinkDefinitionMap.containsKey(linkId)) {
-						fireLinkChanged(linkId, definition);
-					} else {
-						fireLinkAdded(linkId, definition);
-					}
+					if (remoteLinkDefinitionMap.containsKey(linkId)) fireLinkChanged(
+							linkId, definition);
+					else fireLinkAdded(linkId, definition);
 				}
 				
 				remoteLinkDefinitionMap.put(linkPacket.getLinkId(), linkPacket
 						.getDefinition());
 				break;
-			case MultiuserLinkDefinitionPacket.CHANGE_TYPE_DETACH:
+			case DETACH:
 				if (connected && remoteLinkDefinitionMap.containsKey(linkId))
 					fireLinkDetached(linkId, definition);
 				
 				remoteLinkDefinitionMap.remove(linkId);
 				break;
-			case MultiuserLinkDefinitionPacket.CHANGE_TYPE_REMOVE:
+			case REMOVE:
 				break;
 			}
 			
-			if (!connected) {
-				linkDefinitionPacketQueue.add(linkPacket);
-			}
+			if (!connected) linkDefinitionPacketQueue.add(linkPacket);
 			
 			return;
 		case MultiuserPacket.TYPE_NETWORK_NAME:
@@ -327,14 +369,11 @@ public class MultiuserConnection {
 			
 			linkDefinitionMap.put(linkId, definition);
 			
-			if (connected) {
-				changeLink(MultiuserLinkDefinitionPacket.CHANGE_TYPE_NEW,
-						linkId, definition);
-			}
+			if (connected) changeLink(ChangeType.NEW, linkId, definition);
 		}
 	}
 	
-	private void changeLink(int changeType, int linkId,
+	private void changeLink(ChangeType changeType, int linkId,
 			MultiuserLinkDefinition link) throws IOException {
 		MultiuserLinkDefinitionPacket linkPacket = new MultiuserLinkDefinitionPacket(
 				changeType, linkId, link);
@@ -361,65 +400,6 @@ public class MultiuserConnection {
 		synchronized (linkListeners) {
 			for (MultiuserLinkListener linkListener : linkListeners) {
 				linkListener.linkDetached(linkId, definition);
-			}
-		}
-	}
-	
-	private class PacketListener implements PTMPPacketListener {
-		public void receivePacket(PTMPEncodedPacket packet) {
-			if ((packet.getType() < MultiuserPacket.TYPE_MIN)
-					|| (packet.getType() > MultiuserPacket.TYPE_MAX)) return;
-			
-			handlePacket(packet);
-		}
-	}
-	
-	private interface ConnectionManager extends MultiuserPacketListener {
-		
-	}
-	
-	private class ClientConnectionManager implements ConnectionManager {
-		public void receivePacket(PTMPEncodedPacket packet) {
-			try {
-				switch (packet.getType()) {
-				case MultiuserPacket.TYPE_INITIALISATION_RESPONSE:
-					// MultiuserInitialisationPacket initialisationResponse =
-					// new MultiuserInitialisationPacket(
-					// packet);
-					new MultiuserInitialisationPacket(packet);
-					
-					MultiuserXYZPacket xyz = new MultiuserXYZPacket(0);
-					sendImpl(xyz);
-					
-					MultiuserNetworkNamePacket networkName = new MultiuserNetworkNamePacket(
-							MultiuserConnection.this.networkName);
-					sendImpl(networkName);
-					
-					break;
-				case MultiuserPacket.TYPE_XYZ:
-					synchronized (linkDefinitionMap) {
-						for (Map.Entry<Integer, MultiuserLinkDefinition> entry : linkDefinitionMap
-								.entrySet()) {
-							changeLink(
-									MultiuserLinkDefinitionPacket.CHANGE_TYPE_NEW,
-									entry.getKey(), entry.getValue());
-						}
-						
-						connected = true;
-					}
-					
-					synchronized (connectionMonitor) {
-						connectionMonitor.notify();
-					}
-					
-					break;
-				}
-			} catch (IOException e) {
-				synchronized (connectionMonitor) {
-					connectionMonitor.notify();
-				}
-				
-				connectionError = e;
 			}
 		}
 	}

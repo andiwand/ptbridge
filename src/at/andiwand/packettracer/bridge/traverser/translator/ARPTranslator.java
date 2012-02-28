@@ -11,7 +11,7 @@ public class ARPTranslator extends
 		GenericPDUTranslator<ARPPacket, MultiuserARPPacket> {
 	
 	@Override
-	public MultiuserARPPacket translateGeneric(ARPPacket packet) {
+	public MultiuserARPPacket toMultiuserGeneric(ARPPacket packet) {
 		MultiuserARPPacket result = new MultiuserARPPacket();
 		
 		result.setHardwareType(packet.getHardwareType());
@@ -30,7 +30,7 @@ public class ARPTranslator extends
 	}
 	
 	@Override
-	public ARPPacket translateGeneric(MultiuserARPPacket packet) {
+	public ARPPacket toNetworkGeneric(MultiuserARPPacket packet) {
 		ARPPacket result = new ARPPacket();
 		
 		result.setHardwareType(packet.getHardwareType());

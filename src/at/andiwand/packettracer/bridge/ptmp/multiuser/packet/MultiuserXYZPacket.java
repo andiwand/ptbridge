@@ -40,6 +40,7 @@ public class MultiuserXYZPacket extends MultiuserPacket {
 		return xyz;
 	}
 	
+	@Override
 	public void getValue(PTMPDataWriter writer) {
 		writer.writeInt(xyz);
 	}
@@ -48,11 +49,13 @@ public class MultiuserXYZPacket extends MultiuserPacket {
 		this.xyz = xyz;
 	}
 	
+	@Override
 	public void parseValue(PTMPDataReader reader) {
 		xyz = reader.readInt();
 	}
 	
-	protected boolean legalType2(int type) {
+	@Override
+	protected boolean legalType(int type) {
 		return type == TYPE;
 	}
 	

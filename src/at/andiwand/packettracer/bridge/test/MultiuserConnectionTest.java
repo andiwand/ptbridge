@@ -1,6 +1,5 @@
 package at.andiwand.packettracer.bridge.test;
 
-import java.io.IOException;
 import java.net.InetAddress;
 
 import at.andiwand.packettracer.bridge.ptmp.PTMPAuthentication;
@@ -12,11 +11,10 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPEncryption;
 import at.andiwand.packettracer.bridge.ptmp.PTMPState;
 import at.andiwand.packettracer.bridge.ptmp.PTMPStateListener;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserConnection;
-import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkDefinition;
-import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkListener;
+import at.andiwand.packettracer.bridge.ptmp.multiuser.MultiuserLinkMirrorAdapter;
 
 
-public class TestMultiuserConnection {
+public class MultiuserConnectionTest {
 	
 	public static void main(String[] args) throws Throwable {
 		PTMPConnection ptmpConnection = new PTMPConnection();
@@ -24,32 +22,14 @@ public class TestMultiuserConnection {
 				PTMPEncoding.TEXT, PTMPEncryption.NONE, PTMPCompression.NO,
 				PTMPAuthentication.CLEAR_TEXT, 0));
 		
-		ptmpConnection.connect(InetAddress.getLocalHost(), "Bridge", "");
+		ptmpConnection.connect(InetAddress.getByName("127.0.0.1"),
+				"PacketTracer Bridge", "");
 		System.out.println("ptmp connected");
 		
 		final MultiuserConnection multiuserConnection = new MultiuserConnection(
 				"*network name*");
-		multiuserConnection.addLinkListener(new MultiuserLinkListener() {
-			public void linkAdded(int linkId, MultiuserLinkDefinition definition) {
-				try {
-					multiuserConnection.addMultiuserLink(linkId, definition);
-				} catch (IOException e) {}
-			}
-			
-			public void linkChanged(int linkId,
-					MultiuserLinkDefinition definition) {
-				try {
-					multiuserConnection.changeMultiuserLink(linkId, definition);
-				} catch (IOException e) {}
-			}
-			
-			public void linkDetached(int linkId,
-					MultiuserLinkDefinition definition) {
-				try {
-					multiuserConnection.removeMultiuserLink(linkId);
-				} catch (IOException e) {}
-			}
-		});
+		multiuserConnection.addLinkListener(new MultiuserLinkMirrorAdapter(
+				multiuserConnection));
 		multiuserConnection.connect(ptmpConnection);
 		System.out.println("multiuser connected");
 		

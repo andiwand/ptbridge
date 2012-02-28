@@ -37,10 +37,10 @@ logical
 CTcpHeader
 
 binary
-| ? | short | short | ? | int | int | byte | byte | byte | short | short | short | int | int |
+| short | short | ? | int | int | byte | byte | byte | short | short | short | int | int |
 
 logical
-| ? | src port | dst port | ? | sequence number | acknowledgment number | ? | flags | ? | ? | ? | ? | ? |
+| src port | dst port | ? | sequence number | acknowledgment number | ? | flags | ? | ? | ? | ? | options flag? |
 
 
 CUdpHeader
