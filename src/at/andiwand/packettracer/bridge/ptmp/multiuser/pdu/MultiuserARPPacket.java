@@ -28,7 +28,7 @@ public class MultiuserARPPacket extends MultiuserPDU {
 			writer.writeIPv4Address((IPv4Address) address);
 			break;
 		default:
-			throw new IllegalStateException("Unsupported hardware type!");
+			throw new IllegalStateException("Unsupported protocol type!");
 		}
 	}
 	
@@ -50,7 +50,7 @@ public class MultiuserARPPacket extends MultiuserPDU {
 			return reader.readIPv4Address();
 			
 		default:
-			throw new IllegalStateException("Unsupported hardware type!");
+			throw new IllegalStateException("Unsupported protocol type!");
 		}
 	}
 	
@@ -136,11 +136,11 @@ public class MultiuserARPPacket extends MultiuserPDU {
 		
 		if (reader.readByte() != Assignments.ARP
 				.getHardwareLength(hardwareType))
-			throw new IllegalStateException("Illegal hardware address length");
+			throw new IllegalStateException("Illegal hardware address length!");
 		
 		if (reader.readByte() != Assignments.ARP
 				.getProtocolLength(protocolType))
-			throw new IllegalStateException("Illegal protocol address length");
+			throw new IllegalStateException("Illegal protocol address length!");
 		
 		operation = reader.readShort();
 		senderHardwareAddress = readHardwareAddress(hardwareType, reader);

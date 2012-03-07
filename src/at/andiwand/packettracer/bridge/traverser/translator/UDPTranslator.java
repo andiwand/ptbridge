@@ -1,6 +1,7 @@
 package at.andiwand.packettracer.bridge.traverser.translator;
 
 import at.andiwand.packetsocket.pdu.DHCPPacket;
+import at.andiwand.packetsocket.pdu.DNSPacket;
 import at.andiwand.packetsocket.pdu.PDU;
 import at.andiwand.packetsocket.pdu.UDPSegment;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserDHCPPacket;
@@ -14,6 +15,8 @@ public class UDPTranslator extends
 	private static final TranslationHelper TRANSLATION_ASSOCIATOR = new TranslationHelper();
 	
 	static {
+		TRANSLATION_ASSOCIATOR.putTranslator(DNSPacket.class,
+				MultiuserDHCPPacket.class, DNSTranslator.class);
 		TRANSLATION_ASSOCIATOR.putTranslator(DHCPPacket.class,
 				MultiuserDHCPPacket.class, DHCPTranslator.class);
 	}
@@ -25,14 +28,14 @@ public class UDPTranslator extends
 		Class<?> payloadClass = segment.getPayload().getClass();
 		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
 				.getTranslator(payloadClass);
-		MultiuserPDU payload = payloadTranslator
-				.toMultiuser(segment.getPayload());
+		MultiuserPDU payload = payloadTranslator.toMultiuser(segment
+				.getPayload());
 		result.setPayload(payload);
 		
 		result.setSourcePort((short) segment.getSourcePort());
 		result.setDestinationPort((short) segment.getDestinationPort());
 		
-		return null;
+		return result;
 	}
 	
 	@Override
@@ -48,7 +51,7 @@ public class UDPTranslator extends
 		PDU payload = payloadTranslator.toNetwork(segment.getPayload());
 		result.setPayload(payload);
 		
-		return null;
+		return result;
 	}
 	
 }

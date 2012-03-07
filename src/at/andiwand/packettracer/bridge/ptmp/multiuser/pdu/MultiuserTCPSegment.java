@@ -14,11 +14,11 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	}
 	
 	private MultiuserPDU payload;
-	private short sourcePort;
-	private short destinationPort;
+	private int sourcePort;
+	private int destinationPort;
 	private int unknown2;
-	private int sequenceNumber;
-	private int acknowledgmentNumber;
+	private long sequenceNumber;
+	private long acknowledgmentNumber;
 	private byte unknown3;
 	private byte unknown4;
 	private byte flags;
@@ -32,11 +32,11 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		return payload;
 	}
 	
-	public short getSourcePort() {
+	public int getSourcePort() {
 		return sourcePort;
 	}
 	
-	public short getDestinationPort() {
+	public int getDestinationPort() {
 		return destinationPort;
 	}
 	
@@ -44,11 +44,11 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		return unknown2;
 	}
 	
-	public int getSequenceNumber() {
+	public long getSequenceNumber() {
 		return sequenceNumber;
 	}
 	
-	public int getAcknowledgmentNumber() {
+	public long getAcknowledgmentNumber() {
 		return acknowledgmentNumber;
 	}
 	
@@ -85,16 +85,21 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	}
 	
 	public void getBytes(PTMPDataWriter writer) {
-		Class<? extends MultiuserPDU> payloadClass = payload.getClass();
-		String payloadName = PAYLOAD_ASSOCIATOR.getPayloadName(payloadClass);
-		writer.writeString(payloadName);
-		payload.getBytes(writer);
+		if (payload != null) {
+			Class<? extends MultiuserPDU> payloadClass = payload.getClass();
+			String payloadName = PAYLOAD_ASSOCIATOR
+					.getPayloadName(payloadClass);
+			writer.writeString(payloadName);
+			payload.getBytes(writer);
+		} else {
+			writer.writeString("");
+		}
 		
-		writer.writeShort(sourcePort);
-		writer.writeShort(destinationPort);
+		writer.writeShort((short) sourcePort);
+		writer.writeShort((short) destinationPort);
 		writer.writeInt(unknown2);
-		writer.writeInt(sequenceNumber);
-		writer.writeInt(acknowledgmentNumber);
+		writer.writeInt((int) sequenceNumber);
+		writer.writeInt((int) acknowledgmentNumber);
 		writer.writeByte(unknown3);
 		writer.writeByte(unknown4);
 		writer.writeByte(flags);
@@ -116,11 +121,11 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		this.payload = payload;
 	}
 	
-	public void setSourcePort(short sourcePort) {
+	public void setSourcePort(int sourcePort) {
 		this.sourcePort = sourcePort;
 	}
 	
-	public void setDestinationPort(short destinationPort) {
+	public void setDestinationPort(int destinationPort) {
 		this.destinationPort = destinationPort;
 	}
 	
@@ -128,11 +133,11 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		this.unknown2 = unknown2;
 	}
 	
-	public void setSequenceNumber(int sequenceNumber) {
+	public void setSequenceNumber(long sequenceNumber) {
 		this.sequenceNumber = sequenceNumber;
 	}
 	
-	public void setAcknowledgmentNumber(int acknowledgmentNumber) {
+	public void setAcknowledgmentNumber(long acknowledgmentNumber) {
 		this.acknowledgmentNumber = acknowledgmentNumber;
 	}
 	
@@ -176,11 +181,11 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 			payload.parse(reader);
 		}
 		
-		sourcePort = reader.readShort();
-		destinationPort = reader.readShort();
+		sourcePort = reader.readShort() & 0xffff;
+		destinationPort = reader.readShort() & 0xffff;
 		unknown2 = reader.readInt();
-		sequenceNumber = reader.readInt();
-		acknowledgmentNumber = reader.readInt();
+		sequenceNumber = reader.readInt() & 0xffffffffl;
+		acknowledgmentNumber = reader.readInt() & 0xffffffffl;
 		unknown3 = reader.readByte();
 		unknown4 = reader.readByte();
 		flags = reader.readByte();

@@ -14,7 +14,7 @@ import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserTCPSegment;
 import at.andiwand.packettracer.bridge.ptmp.multiuser.pdu.MultiuserTelnetSegment;
 
 
-public class TCPTranslator extends
+public class TCPTranslator2 extends
 		GenericPDUTranslator<TCPSegment, MultiuserTCPSegment> {
 	
 	private static enum Direction {
@@ -60,16 +60,9 @@ public class TCPTranslator extends
 	
 	// TODO: implement dictionary
 	// TODO: auto clean
-	// TODO: port direction?!
-	// TODO: kill ack offset - implement segment size offset
-	// TODO: open connection translation?
 	private static class SequenceTranslator {
 		private final Map<Long, Long> toMultiuserMap = new HashMap<Long, Long>();
 		private final Map<Long, Long> toNetworkMap = new HashMap<Long, Long>();
-		
-		private long multiuserAckExpacted;
-		private long multiuserAckDefect = -1;
-		private long multiuserAckDefectOffset;
 		
 		@Override
 		public String toString() {
@@ -77,33 +70,21 @@ public class TCPTranslator extends
 		}
 		
 		private void putTranslation(long networkSequence, long multiuserSequence) {
+			System.out.println("	put translation (nw <-> mu) "
+					+ networkSequence + " <-> " + multiuserSequence);
+			
 			toMultiuserMap.put(networkSequence, multiuserSequence);
 			toNetworkMap.put(multiuserSequence, networkSequence);
-			
-			if (multiuserSequence > multiuserAckExpacted)
-				multiuserAckExpacted = multiuserSequence;
-		}
-		
-		private Long getToMultiuser(long number) {
-			Long result = toMultiuserMap.get(number);
-			if (result == null) return null;
-			if ((multiuserAckDefect != -1) && (result >= multiuserAckDefect))
-				result += multiuserAckDefectOffset;
-			return result;
-		}
-		
-		private Long getToNetwork(long number) {
-			if ((multiuserAckDefect != -1) && (number >= multiuserAckDefect))
-				number -= multiuserAckDefectOffset;
-			return toNetworkMap.get(number);
 		}
 		
 		public long seqToMultiuser(TCPSegment segment,
 				MultiuserPDU multiuserPayload) {
 			long seq = segment.getSequenceNumber();
 			
-			Long result = getToMultiuser(seq);
-			if (segment.getFlags() == Assignments.TCP.FLAG_ACK) return result;
+			if (segment.getFlags() == Assignments.TCP.FLAG_ACK)
+				return toMultiuserMap.get(seq);
+			
+			Long result = toMultiuserMap.get(seq);
 			
 			if (result == null) {
 				result = seq;
@@ -122,6 +103,9 @@ public class TCPTranslator extends
 						+ multiuserPayload.getBytes(PTMPEncoding.BINARY).length;
 			}
 			
+			System.out.println("size " + networkPayloadSize + " -> "
+					+ multiuserPayloadSize);
+			
 			putTranslation(seq + networkPayloadSize, result
 					+ multiuserPayloadSize);
 			
@@ -131,8 +115,10 @@ public class TCPTranslator extends
 		public long seqToNetwork(PDU networkPayload, MultiuserTCPSegment segment) {
 			long seq = segment.getSequenceNumber();
 			
-			Long result = getToNetwork(seq);
-			if (segment.getFlags() == Assignments.TCP.FLAG_ACK) return result;
+			if (segment.getFlags() == Assignments.TCP.FLAG_ACK)
+				return toNetworkMap.get(seq);
+			
+			Long result = toNetworkMap.get(seq);
 			
 			if (result == null) {
 				result = seq;
@@ -151,6 +137,9 @@ public class TCPTranslator extends
 						+ multiuserPayload.getBytes(PTMPEncoding.BINARY).length;
 			}
 			
+			System.out.println("size " + multiuserPayloadSize + " -> "
+					+ networkPayloadSize);
+			
 			putTranslation(result + networkPayloadSize, seq
 					+ multiuserPayloadSize);
 			
@@ -158,17 +147,17 @@ public class TCPTranslator extends
 		}
 		
 		public long ackToMultiuser(long ack) {
-			return getToMultiuser(ack);
+			Long result = toMultiuserMap.get(ack);
+			if (result == null) return 0;
+			return result;
 		}
 		
 		public long ackToNetwork(long ack) {
-			if (ack > multiuserAckExpacted) {
-				multiuserAckDefect = multiuserAckExpacted;
-				multiuserAckDefectOffset = ack - multiuserAckExpacted;
-			}
-			
-			return getToNetwork(ack);
+			Long result = toNetworkMap.get(ack);
+			if (result == null) return 0;
+			return result;
 		}
+		
 	}
 	
 	private static final TranslationHelper TRANSLATION_ASSOCIATOR = new TranslationHelper() {
@@ -219,12 +208,18 @@ public class TCPTranslator extends
 			sequenceTranslatorMap.put(connectionSlot, sequenceTranslator);
 		}
 		
+		System.out.println("-- To Network TCP Translator --");
+		
 		result.setSequenceNumber(sequenceTranslator.seqToNetwork(result
 				.getPayload(), segment));
-		if ((segment.getFlags() & Assignments.TCP.FLAG_ACK) != 0) {
-			result.setAcknowledgmentNumber(sequenceTranslator
-					.ackToNetwork(segment.getAcknowledgmentNumber()));
-		}
+		result.setAcknowledgmentNumber(sequenceTranslator.ackToNetwork(segment
+				.getAcknowledgmentNumber()));
+		
+		System.out.println("seq " + segment.getSequenceNumber() + " -> "
+				+ result.getSequenceNumber());
+		System.out.println("ack " + segment.getAcknowledgmentNumber() + " -> "
+				+ result.getAcknowledgmentNumber());
+		System.out.println("flags " + segment.getFlags());
 		
 		return result;
 	}
@@ -248,7 +243,7 @@ public class TCPTranslator extends
 		// TODO: remove
 		int minPort = Math.min(segment.getSourcePort(), segment
 				.getDestinationPort());
-		if (minPort != 23) throw new RuntimeException("Unsupported port!");
+		if (minPort != 23) throw new RuntimeException();
 		
 		result.setSourcePort(segment.getSourcePort());
 		result.setDestinationPort(segment.getDestinationPort());
@@ -260,7 +255,7 @@ public class TCPTranslator extends
 		result.setUnknown6((short) 0);
 		result.setUnknown7((short) 0);
 		result.setUnknown8(0);
-		result.setUnknown9(0);
+		result.setUnknown9(1);
 		
 		ConnectionSlot connectionSlot = new ConnectionSlot(segment
 				.getSourcePort(), segment.getDestinationPort(),
@@ -273,12 +268,18 @@ public class TCPTranslator extends
 			sequenceTranslatorMap.put(connectionSlot, sequenceTranslator);
 		}
 		
+		System.out.println("-- To Multiuser TCP Translator --");
+		
 		result.setSequenceNumber(sequenceTranslator.seqToMultiuser(segment,
 				result.getPayload()));
-		if ((segment.getFlags() & Assignments.TCP.FLAG_ACK) != 0) {
-			result.setAcknowledgmentNumber(sequenceTranslator
-					.ackToMultiuser(segment.getAcknowledgmentNumber()));
-		}
+		result.setAcknowledgmentNumber(sequenceTranslator
+				.ackToMultiuser(segment.getAcknowledgmentNumber()));
+		
+		System.out.println("seq " + segment.getSequenceNumber() + " -> "
+				+ result.getSequenceNumber());
+		System.out.println("ack " + segment.getAcknowledgmentNumber() + " -> "
+				+ result.getAcknowledgmentNumber());
+		System.out.println("flags " + segment.getFlags());
 		
 		return result;
 	}

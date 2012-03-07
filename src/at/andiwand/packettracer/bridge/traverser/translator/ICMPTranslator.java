@@ -9,43 +9,55 @@ public class ICMPTranslator extends
 	
 	@Override
 	protected MultiuserICMPPacket toMultiuserGeneric(ICMPPacket packet) {
-		MultiuserICMPPacket result;
+		MultiuserICMPPacket result = new MultiuserICMPPacket();
 		
-		if (packet instanceof ICMPPacket.Echo) {
-			ICMPPacket.Echo echo = (ICMPPacket.Echo) packet;
+		result.setType(packet.getType());
+		result.setCode(packet.getCode());
+		
+		MultiuserICMPPacket.ICMPPayload resultPayload;
+		ICMPPacket.ICMPPayload payload = packet.getPayload();
+		
+		if (payload instanceof ICMPPacket.EchoPayload) {
+			ICMPPacket.EchoPayload echoPayload = (ICMPPacket.EchoPayload) payload;
 			
-			MultiuserICMPPacket.Echo resultEcho = new MultiuserICMPPacket.Echo();
-			resultEcho.setIdentifier(echo.getIdentifier());
-			resultEcho.setSequenceNumber(echo.getSequenceNumber());
-			result = resultEcho;
+			MultiuserICMPPacket.EchoPayload resultEchoPayload = new MultiuserICMPPacket.EchoPayload();
+			resultEchoPayload.setIdentifier(echoPayload.getIdentifier());
+			resultEchoPayload
+					.setSequenceNumber(echoPayload.getSequenceNumber());
+			resultPayload = resultEchoPayload;
 		} else {
 			throw new IllegalArgumentException("Unsupported ICMP packet!");
 		}
 		
-		result.setType(packet.getType());
-		result.setCode(packet.getCode());
+		result.setPayload(resultPayload);
 		
 		return result;
 	}
 	
 	@Override
 	protected ICMPPacket toNetworkGeneric(MultiuserICMPPacket packet) {
-		ICMPPacket result;
+		ICMPPacket result = new ICMPPacket();
 		
-		if (packet instanceof MultiuserICMPPacket.Echo) {
-			MultiuserICMPPacket.Echo echo = (MultiuserICMPPacket.Echo) packet;
+		result.setType(packet.getType());
+		result.setCode(packet.getCode());
+		
+		ICMPPacket.ICMPPayload resultPayload;
+		MultiuserICMPPacket.ICMPPayload payload = packet.getPayload();
+		
+		if (payload instanceof MultiuserICMPPacket.EchoPayload) {
+			MultiuserICMPPacket.EchoPayload echoPayload = (MultiuserICMPPacket.EchoPayload) payload;
 			
-			ICMPPacket.Echo resultEcho = new ICMPPacket.Echo();
-			resultEcho.setIdentifier(echo.getIdentifier());
-			resultEcho.setSequenceNumber(echo.getSequenceNumber());
-			resultEcho.setData(new byte[0]);
-			result = resultEcho;
+			ICMPPacket.EchoPayload resultEchoPayload = new ICMPPacket.EchoPayload();
+			resultEchoPayload.setIdentifier(echoPayload.getIdentifier());
+			resultEchoPayload
+					.setSequenceNumber(echoPayload.getSequenceNumber());
+			resultEchoPayload.setData(new byte[0]);
+			resultPayload = resultEchoPayload;
 		} else {
 			throw new IllegalArgumentException("Unsupported ICMP packet!");
 		}
 		
-		result.setType(packet.getType());
-		result.setCode(packet.getCode());
+		result.setPayload(resultPayload);
 		
 		return result;
 	}

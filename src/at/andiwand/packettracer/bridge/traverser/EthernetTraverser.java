@@ -26,6 +26,20 @@ public class EthernetTraverser {
 								size);
 						sendToMultiuserLink(frame);
 					} catch (RuntimeException e) {
+						// TODO: remove
+						if (e.getMessage() != null
+								&& e.getMessage()
+										.contains("Unregistered type!"))
+							continue;
+						if ("Unsupported port!".equals(e.getMessage()))
+							continue;
+						// if (e.getMessage() == null && e.getCause() == null)
+						// continue;
+						if ("Unsupported option!".equals(e.getMessage()))
+							continue;
+						if ("Unregistered protocol".equals(e.getMessage()))
+							continue;
+						
 						e.printStackTrace();
 					}
 				}
