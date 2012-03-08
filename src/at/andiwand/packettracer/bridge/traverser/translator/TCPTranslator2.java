@@ -247,8 +247,8 @@ public class TCPTranslator2 extends
 		
 		result.setSourcePort(segment.getSourcePort());
 		result.setDestinationPort(segment.getDestinationPort());
-		result.setUnknown2(0);
-		result.setUnknown3((byte) 0);
+		result.setUnknown1(0);
+		result.setUnknown2((byte) 0);
 		result.setUnknown4((byte) 15);
 		result.setFlags(segment.getFlags());
 		result.setUnknown5((short) -1);

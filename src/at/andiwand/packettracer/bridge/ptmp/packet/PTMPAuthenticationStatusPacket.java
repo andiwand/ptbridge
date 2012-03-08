@@ -17,8 +17,8 @@ public class PTMPAuthenticationStatusPacket extends PTMPPacket {
 		this.status = status;
 	}
 	
-	public PTMPAuthenticationStatusPacket(PTMPDataReader reader) {
-		super(reader);
+	public PTMPAuthenticationStatusPacket(PTMPDataReader in) {
+		super(in);
 	}
 	
 	public PTMPAuthenticationStatusPacket(byte[] packet, PTMPEncoding encoding) {
@@ -39,16 +39,16 @@ public class PTMPAuthenticationStatusPacket extends PTMPPacket {
 		return status;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		writer.writeBoolean(status);
+	public void getValue(PTMPDataWriter out) {
+		out.writeBoolean(status);
 	}
 	
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
-		status = reader.readBoolean();
+	public void parseValue(PTMPDataReader in) {
+		status = in.readBoolean();
 	}
 	
 	protected boolean legalType(int type) {

@@ -17,8 +17,8 @@ public class PTMPAuthenticationChallengePacket extends PTMPPacket {
 		this.challengeText = challengeText;
 	}
 	
-	public PTMPAuthenticationChallengePacket(PTMPDataReader reader) {
-		super(reader);
+	public PTMPAuthenticationChallengePacket(PTMPDataReader in) {
+		super(in);
 	}
 	
 	public PTMPAuthenticationChallengePacket(byte[] packet,
@@ -41,16 +41,16 @@ public class PTMPAuthenticationChallengePacket extends PTMPPacket {
 		return challengeText;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		writer.writeString(challengeText);
+	public void getValue(PTMPDataWriter out) {
+		out.writeString(challengeText);
 	}
 	
 	public void setChallengeText(String challengeText) {
 		this.challengeText = challengeText;
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
-		challengeText = reader.readString();
+	public void parseValue(PTMPDataReader in) {
+		challengeText = in.readString();
 	}
 	
 	protected boolean legalType(int type) {

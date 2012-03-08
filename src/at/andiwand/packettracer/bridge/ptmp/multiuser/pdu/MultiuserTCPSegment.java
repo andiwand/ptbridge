@@ -9,14 +9,14 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	private static final MultiuserPayloadAssociator PAYLOAD_ASSOCIATOR = new MultiuserPayloadAssociator();
 	
 	static {
-		PAYLOAD_ASSOCIATOR.putEntry("CTelnetPacket",
+		PAYLOAD_ASSOCIATOR.putEntry("TelnetPacket",
 				MultiuserTelnetSegment.class);
 	}
 	
 	private MultiuserPDU payload;
 	private int sourcePort;
 	private int destinationPort;
-	private int unknown2;
+	private int unknown1;
 	private long sequenceNumber;
 	private long acknowledgmentNumber;
 	private byte unknown3;
@@ -41,7 +41,7 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	}
 	
 	public int getUnknown2() {
-		return unknown2;
+		return unknown1;
 	}
 	
 	public long getSequenceNumber() {
@@ -97,7 +97,7 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		
 		writer.writeShort((short) sourcePort);
 		writer.writeShort((short) destinationPort);
-		writer.writeInt(unknown2);
+		writer.writeInt(unknown1);
 		writer.writeInt((int) sequenceNumber);
 		writer.writeInt((int) acknowledgmentNumber);
 		writer.writeByte(unknown3);
@@ -106,15 +106,16 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		writer.writeShort(unknown5);
 		writer.writeShort(unknown6);
 		writer.writeShort(unknown7);
-		writer.writeInt(unknown8);
-		writer.writeInt(unknown9);
 		
-		if (unknown9 == 1) {
+		if (unknown7 == 1) {
 			writer.writeString("CTcpOptionMSS");
 			writer.writeInt(2);
 			writer.writeInt(4);
 			writer.writeInt(1460);
 		}
+		
+		writer.writeInt(unknown8);
+		writer.writeInt(unknown9);
 	}
 	
 	public void setPayload(MultiuserPDU payload) {
@@ -130,7 +131,7 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	}
 	
 	public void setUnknown2(int unknown2) {
-		this.unknown2 = unknown2;
+		this.unknown1 = unknown2;
 	}
 	
 	public void setSequenceNumber(long sequenceNumber) {
@@ -183,7 +184,7 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		
 		sourcePort = reader.readShort() & 0xffff;
 		destinationPort = reader.readShort() & 0xffff;
-		unknown2 = reader.readInt();
+		unknown1 = reader.readInt();
 		sequenceNumber = reader.readInt() & 0xffffffffl;
 		acknowledgmentNumber = reader.readInt() & 0xffffffffl;
 		unknown3 = reader.readByte();
@@ -192,15 +193,16 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		unknown5 = reader.readShort();
 		unknown6 = reader.readShort();
 		unknown7 = reader.readShort();
-		unknown8 = reader.readInt();
-		unknown9 = reader.readInt();
 		
-		if (unknown9 == 1) {
+		if (unknown7 == 1) {
 			reader.readString();
 			reader.readInt();
 			reader.readInt();
 			reader.readInt();
 		}
+		
+		unknown8 = reader.readInt();
+		unknown9 = reader.readInt();
 	}
 	
 }

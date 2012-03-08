@@ -97,8 +97,8 @@ public class MultiuserARPPacket extends MultiuserPDU {
 		writer.writeByte(Assignments.ARP.getProtocolLength(protocolType));
 		writer.writeShort(operation);
 		writeHardwareAddress(senderHardwareAddress, hardwareType, writer);
-		writeHardwareAddress(targetHardwareAddress, hardwareType, writer);
 		writeProtocolAddress(senderProtocolAddress, protocolType, writer);
+		writeHardwareAddress(targetHardwareAddress, hardwareType, writer);
 		writeProtocolAddress(targetProtocolAddress, protocolType, writer);
 	}
 	
@@ -144,8 +144,8 @@ public class MultiuserARPPacket extends MultiuserPDU {
 		
 		operation = reader.readShort();
 		senderHardwareAddress = readHardwareAddress(hardwareType, reader);
-		targetHardwareAddress = readHardwareAddress(hardwareType, reader);
 		senderProtocolAddress = readProtocolAddress(protocolType, reader);
+		targetHardwareAddress = readHardwareAddress(hardwareType, reader);
 		targetProtocolAddress = readProtocolAddress(protocolType, reader);
 	}
 	

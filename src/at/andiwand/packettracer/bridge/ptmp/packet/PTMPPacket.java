@@ -30,10 +30,10 @@ public abstract class PTMPPacket {
 		this.type = type;
 	}
 	
-	public PTMPPacket(PTMPDataReader reader) {
-		this(reader.readInt());
+	public PTMPPacket(PTMPDataReader in) {
+		this(in.readInt());
 		
-		parseValue(reader);
+		parseValue(in);
 	}
 	
 	public PTMPPacket(byte[] packet, PTMPEncoding encoding) {
@@ -58,7 +58,7 @@ public abstract class PTMPPacket {
 		return type;
 	}
 	
-	public abstract void getValue(PTMPDataWriter writer);
+	public abstract void getValue(PTMPDataWriter out);
 	
 	public byte[] getValue(PTMPEncoding encoding) {
 		PTMPDataWriter writer = new PTMPDataWriter(encoding);
@@ -70,9 +70,9 @@ public abstract class PTMPPacket {
 		return getValue(configuration.getEncoding());
 	}
 	
-	public void getBytes(PTMPDataWriter writer) {
-		writer.writeInt(type);
-		getValue(writer);
+	public void getBytes(PTMPDataWriter out) {
+		out.writeInt(type);
+		getValue(out);
 	}
 	
 	public byte[] getBytes(PTMPEncoding encoding) {
@@ -85,7 +85,7 @@ public abstract class PTMPPacket {
 		return getBytes(configuration.getEncoding());
 	}
 	
-	public abstract void parseValue(PTMPDataReader reader);
+	public abstract void parseValue(PTMPDataReader in);
 	
 	public void parseValue(byte[] value, PTMPEncoding encoding) {
 		parseValue(new PTMPDataReader(value, encoding));

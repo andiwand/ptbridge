@@ -258,9 +258,8 @@ public class TCPTranslator extends
 		result.setFlags(segment.getFlags());
 		result.setUnknown5((short) -1);
 		result.setUnknown6((short) 0);
-		result.setUnknown7((short) 0);
+		result.setUnknown7((byte) 0);
 		result.setUnknown8(0);
-		result.setUnknown9(0);
 		
 		ConnectionSlot connectionSlot = new ConnectionSlot(segment
 				.getSourcePort(), segment.getDestinationPort(),

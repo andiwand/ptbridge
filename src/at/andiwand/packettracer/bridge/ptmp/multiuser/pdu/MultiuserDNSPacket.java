@@ -12,38 +12,6 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPDataWriter;
 
 public class MultiuserDNSPacket extends MultiuserPDU {
 	
-	/*
-	 * CDnsHeader, 13827, false, 1, false, false, true, false, 0, 1, 0, 0,
-	 * test.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 0, 0, 0
-	 * 
-	 * CDnsHeader, 16844, true, 1, false, false, true, false, 0, 1, 1, 0,
-	 * test.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 1,
-	 * test.local, 4, 1, 86400, 4, -4713, 1, 1, 0, 0, 0, 0, true, 192.168.15.101,
-	 * 0, 0
-	 * 
-	 * CDnsHeader, 43966, true, 1, false, false, true, false, 0, 1, 2, 0,
-	 * t.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 2,
-	 * t.local, 0, 1, 86400, 10, -4713, 1, 1, 0, 0, 0, 0, true, true,
-	 * test.local, 4, 1, 86400, 4, -4713, 1, 1, 0, 0, 0, 0, true, 192.168.15.101,
-	 * 0, 0
-	 * 
-	 * header
-	 * 		CDnsHeader, 16844, true, 1, false, false, true, false, 0, 1, 1, 0
-	 * entry
-	 * 		test.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 1
-	 * trailing
-	 * 		0, 0
-	 * 
-	 * header
-	 * 		CDnsHeader, id, response, operation code, aa, tc,
-	 * 		rd, ra, aa count, tc count, rd count, ra count
-	 * entry
-	 * 		domain name, type?, class, time to live, data length?,
-	 * 		?, 1, 1, 0, 0, 0, 0, payload y/n?, payload
-	 * trailing
-	 * 		0, 0
-	 */
-	
 	public static class DNSEntry {
 		private String domainName;
 		private byte type;
@@ -163,16 +131,31 @@ public class MultiuserDNSPacket extends MultiuserPDU {
 		writer.writeShort(getNameServerCount());
 		writer.writeShort(getAdditionalRecordCount());
 		
-		List<List<DNSEntry>> recordsLists = new ArrayList<List<DNSEntry>>();
-		recordsLists.add(getQuestions());
-		recordsLists.add(getAnswers());
-		recordsLists.add(getNameServers());
-		recordsLists.add(getAdditionalRecords());
+		List<List<DNSEntry>> entriesList = new ArrayList<List<DNSEntry>>();
+		entriesList.add(questions);
+		entriesList.add(answers);
+		entriesList.add(nameServers);
+		entriesList.add(additionalRecords);
 		
-		// TODO: rename
-		for (List<DNSEntry> records : recordsLists) {
-			for (DNSEntry record : records) {
-				record.toString();
+		for (List<DNSEntry> entries : entriesList) {
+			for (DNSEntry entry : entries) {
+				writer.writeString(entry.domainName);
+				writer.writeByte(entry.type);
+				writer.writeByte(entry.clazz);
+				writer.writeInt(entry.timeToLive);
+				writer.writeInt(0);
+				writer.writeInt(0);
+				writer.writeInt(1);
+				writer.writeInt(1);
+				writer.writeInt(0);
+				writer.writeInt(0);
+				writer.writeInt(0);
+				writer.writeInt(0);
+				writer.writeBoolean(entry.ressource != null);
+				
+				if (entry.ressource == null) {
+					writer.writeInt(0);
+				}
 			}
 		}
 		

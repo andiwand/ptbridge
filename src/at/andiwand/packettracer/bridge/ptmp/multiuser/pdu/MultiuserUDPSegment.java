@@ -9,8 +9,8 @@ public class MultiuserUDPSegment extends MultiuserPDU {
 	private static final MultiuserPayloadAssociator PAYLOAD_ASSOCIATOR = new MultiuserPayloadAssociator();
 	
 	static {
-		PAYLOAD_ASSOCIATOR.putEntry("CDnsMessage", MultiuserDNSPacket.class);
-		PAYLOAD_ASSOCIATOR.putEntry("CDhcpPacket", MultiuserDHCPPacket.class);
+		PAYLOAD_ASSOCIATOR.putEntry("DnsMessage", MultiuserDNSPacket.class);
+		PAYLOAD_ASSOCIATOR.putEntry("DhcpPacket", MultiuserDHCPPacket.class);
 	}
 	
 	private MultiuserPDU payload;

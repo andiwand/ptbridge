@@ -21,8 +21,8 @@ public class PTMPDisconnectPacket extends PTMPPacket {
 		super(TYPE);
 	}
 	
-	public PTMPDisconnectPacket(PTMPDataReader reader) {
-		super(reader);
+	public PTMPDisconnectPacket(PTMPDataReader in) {
+		super(in);
 	}
 	
 	public PTMPDisconnectPacket(byte[] packet, PTMPEncoding encoding) {
@@ -43,16 +43,16 @@ public class PTMPDisconnectPacket extends PTMPPacket {
 		return message;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		writer.writeString(message);
+	public void getValue(PTMPDataWriter out) {
+		out.writeString(message);
 	}
 	
 	public void setMessage(String message) {
 		this.message = message;
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
-		message = reader.readString();
+	public void parseValue(PTMPDataReader in) {
+		message = in.readString();
 	}
 	
 	protected boolean legalType(int type) {

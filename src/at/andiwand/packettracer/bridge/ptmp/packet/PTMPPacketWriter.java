@@ -21,7 +21,7 @@ public class PTMPPacketWriter {
 	private PTMPEncryption encryption;
 	private PTMPCompression compression;
 	
-	private PTMPDataOutputStream dataOutputStream;
+	private PTMPDataOutputStream out;
 	
 	private byte[] encryptionKey;
 	
@@ -29,22 +29,19 @@ public class PTMPPacketWriter {
 		this(outputStream, PTMPConfiguration.DEFAULT);
 	}
 	
-	public PTMPPacketWriter(OutputStream outputStream, PTMPEncoding encoding,
+	public PTMPPacketWriter(OutputStream out, PTMPEncoding encoding,
 			PTMPEncryption encryption, PTMPCompression compression) {
 		this.encoding = encoding;
 		this.encryption = encryption;
 		this.compression = compression;
 		
-		BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-				outputStream);
-		dataOutputStream = new PTMPDataOutputStream(bufferedOutputStream,
+		this.out = new PTMPDataOutputStream(new BufferedOutputStream(out),
 				encoding);
 	}
 	
-	public PTMPPacketWriter(OutputStream outputStream,
-			PTMPConfiguration configuration) {
-		this(outputStream, configuration.getEncoding(), configuration
-				.getEncryption(), configuration.getCompression());
+	public PTMPPacketWriter(OutputStream out, PTMPConfiguration configuration) {
+		this(out, configuration.getEncoding(), configuration.getEncryption(),
+				configuration.getCompression());
 	}
 	
 	public PTMPEncoding getEncoding() {
@@ -66,7 +63,7 @@ public class PTMPPacketWriter {
 	public void setEncoding(PTMPEncoding encoding) {
 		this.encoding = encoding;
 		
-		dataOutputStream.setEncoding(encoding);
+		out.setEncoding(encoding);
 	}
 	
 	public void setEncryption(PTMPEncryption encryption) {
@@ -125,9 +122,9 @@ public class PTMPPacketWriter {
 		byte[] packetBytes = packetOutputStream.toByteArray();
 		
 		synchronized (this) {
-			dataOutputStream.writeInt(packetBytes.length);
-			dataOutputStream.write(packetBytes);
-			dataOutputStream.flush();
+			out.writeInt(packetBytes.length);
+			out.write(packetBytes);
+			out.flush();
 		}
 	}
 	
