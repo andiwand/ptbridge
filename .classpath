@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry excluding="at/andiwand/packettracer/bridge/traverser/translator/TCPTranslator2.java" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jcterm-0.0.9.jar"/>
 	<classpathentry kind="lib" path="lib/common.jar"/>
 	<classpathentry kind="lib" path="lib/packetsocket.jar"/>
 	<classpathentry kind="output" path="bin"/>
