@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Sat Mar 10 17:56:14 CET 2012
+onejar.license.required=false
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=packettracer-bridge.jar
+manifest.mergeall=true
+manifest.mainclass=at.andiwand.packettracer.bridge.test.EthernetTraverserTest
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=
