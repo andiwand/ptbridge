@@ -177,7 +177,21 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	public void parse(PTMPDataReader reader) {
 		String payloadName = reader.readString();
 		
-		if (!payloadName.isEmpty()) {
+		if (payloadName.equals("VariableSizePdu")) {
+			reader.readInt();
+		} else if (payloadName.equals("PduGroup")) {
+			int size = reader.readInt();
+			MultiuserPDU[] payloads = new MultiuserPDU[size];
+			
+			for (int i = 0; i < size; i++) {
+				payloadName = reader.readString();
+				payloads[i] = PAYLOAD_ASSOCIATOR
+						.getPayloadInstance(payloadName);
+				payloads[i].parse(reader);
+			}
+			
+			payload = payloads[0];
+		} else if (!payloadName.isEmpty()) {
 			payload = PAYLOAD_ASSOCIATOR.getPayloadInstance(payloadName);
 			payload.parse(reader);
 		}

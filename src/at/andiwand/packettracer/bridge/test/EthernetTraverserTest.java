@@ -34,7 +34,8 @@ public class EthernetTraverserTest {
 				address = InetAddress.getByName(tmp[0]);
 				if (tmp.length > 1) port = Integer.parseInt(tmp[1]);
 			} catch (Throwable t) {
-				System.err.println("usage: <program> [<interface> <pt_ip>[:<pt_port>]]");
+				System.err
+						.println("usage: <program> [<interface> <pt_ip>[:<pt_port>]]");
 				System.err.println();
 				System.err.println("default: eth0 127.0.0.1:38000");
 				System.exit(1);
@@ -60,13 +61,15 @@ public class EthernetTraverserTest {
 		linkDefinition.setFullDuplex(true);
 		linkDefinition.setAutoBandwidth(true);
 		linkDefinition.setAutoDuplex(true);
-		linkDefinition.setInterfaceType(MultiuserInterfaceType.COPPER_FAST_ETHERNET);
+		linkDefinition
+				.setInterfaceType(MultiuserInterfaceType.COPPER_FAST_ETHERNET);
 		linkDefinition.setInterfaceCrossing(false);
 		linkDefinition.setInterfaceUp(true);
 		linkDefinition.setDeviceUp(true);
 		multiuserConnection.addMultiuserLink(0, linkDefinition);
 		multiuserConnection.connect(ptmpConnection);
-		MultiuserLinkAdapter linkAdapter = multiuserConnection.getLinkAdapter(0);
+		MultiuserLinkAdapter linkAdapter = multiuserConnection
+				.getLinkAdapter(0);
 		
 		EthernetTraverser ethernetTraverser = new EthernetTraverser(
 				ethernetSocket, linkAdapter);

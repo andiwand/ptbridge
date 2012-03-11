@@ -97,8 +97,8 @@ public class TelnetTranslator extends
 		
 		result.setMessage(filteredMessage);
 		
-		result.setUnknown1(false);
-		result.setUnknown2(100);
+		result.setUnknown1(true);
+		result.setUnknown2(0);
 		
 		return result;
 	}
