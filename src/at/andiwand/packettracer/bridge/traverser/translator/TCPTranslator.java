@@ -71,10 +71,8 @@ public class TCPTranslator extends
 		private long multiuserAckDefect = -1;
 		private long multiuserAckDefectOffset;
 		
-		@Override
-		public String toString() {
-			return toMultiuserMap.toString();
-		}
+		private boolean multiuserFinAck;
+		private long multiuserFinAckExpacted = -1;
 		
 		private void putTranslation(long networkSequence, long multiuserSequence) {
 			toMultiuserMap.put(networkSequence, multiuserSequence);
@@ -93,8 +91,10 @@ public class TCPTranslator extends
 		}
 		
 		private Long getToNetwork(long number) {
-			if ((multiuserAckDefect != -1) && (number >= multiuserAckDefect))
+			if (!toNetworkMap.containsKey(number) && (multiuserAckDefect != -1)
+					&& (number >= multiuserAckDefect))
 				number -= multiuserAckDefectOffset;
+			
 			return toNetworkMap.get(number);
 		}
 		
@@ -104,6 +104,9 @@ public class TCPTranslator extends
 			
 			Long result = getToMultiuser(seq);
 			if (segment.getFlags() == Assignments.TCP.FLAG_ACK) return result;
+			
+			if ((segment.getFlags() & Assignments.TCP.FLAG_FIN) != 0)
+				multiuserFinAckExpacted = seq + 1;
 			
 			if (result == null) {
 				result = seq;
@@ -134,6 +137,9 @@ public class TCPTranslator extends
 			Long result = getToNetwork(seq);
 			if (segment.getFlags() == Assignments.TCP.FLAG_ACK) return result;
 			
+			if ((segment.getFlags() & Assignments.TCP.FLAG_FIN) != 0)
+				multiuserFinAck = true;
+			
 			if (result == null) {
 				result = seq;
 				putTranslation(seq, seq);
@@ -162,6 +168,9 @@ public class TCPTranslator extends
 		}
 		
 		public long ackToNetwork(long ack) {
+			if (multiuserFinAck && (multiuserFinAckExpacted != -1))
+				return multiuserFinAckExpacted;
+			
 			if (ack > multiuserAckExpacted) {
 				multiuserAckDefect = multiuserAckExpacted;
 				multiuserAckDefectOffset = ack - multiuserAckExpacted;
@@ -179,6 +188,22 @@ public class TCPTranslator extends
 	};
 	
 	private final Map<ConnectionSlot, SequenceTranslator> sequenceTranslatorMap = new HashMap<ConnectionSlot, SequenceTranslator>();
+	private final Map<ConnectionSlot, TranslationHelper> translationAssociatorMap = new HashMap<ConnectionSlot, TranslationHelper>();
+	
+	private TranslationHelper getTranslationHelper(ConnectionSlot connectionSlot) {
+		TranslationHelper result = translationAssociatorMap.get(connectionSlot);
+		if (result == null) {
+			result = new TranslationHelper(TRANSLATION_ASSOCIATOR);
+			translationAssociatorMap.put(connectionSlot, result);
+		}
+		
+		return result;
+	}
+	
+	private PDUTranslator getTranslator(ConnectionSlot connectionSlot,
+			Class<?> payloadClass) {
+		return getTranslationHelper(connectionSlot).getTranslator(payloadClass);
+	}
 	
 	// TODO: complete
 	@Override
@@ -198,19 +223,20 @@ public class TCPTranslator extends
 		result.setChecksum((short) 0);
 		result.setUrgentPointer(0);
 		
+		ConnectionSlot connectionSlot = new ConnectionSlot(segment
+				.getSourcePort(), segment.getDestinationPort(),
+				Direction.NETWORK);
+		
 		if (segment.getPayload() != null) {
 			Class<?> payloadClass = segment.getPayload().getClass();
-			PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-					.getTranslator(payloadClass);
+			PDUTranslator payloadTranslator = getTranslator(connectionSlot,
+					payloadClass);
 			PDU payload = payloadTranslator.toNetwork(segment.getPayload());
 			result.setPayload(payload);
 		} else {
 			result.setPayload(null);
 		}
 		
-		ConnectionSlot connectionSlot = new ConnectionSlot(segment
-				.getSourcePort(), segment.getDestinationPort(),
-				Direction.NETWORK);
 		SequenceTranslator sequenceTranslator = sequenceTranslatorMap
 				.get(connectionSlot);
 		
@@ -234,10 +260,14 @@ public class TCPTranslator extends
 	protected MultiuserTCPSegment toMultiuserGeneric(TCPSegment segment) {
 		MultiuserTCPSegment result = new MultiuserTCPSegment();
 		
+		ConnectionSlot connectionSlot = new ConnectionSlot(segment
+				.getSourcePort(), segment.getDestinationPort(),
+				Direction.NETWORK);
+		
 		if (segment.getPayload() != null) {
 			Class<?> payloadClass = segment.getPayload().getClass();
-			PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-					.getTranslator(payloadClass);
+			PDUTranslator payloadTranslator = getTranslator(connectionSlot,
+					payloadClass);
 			MultiuserPDU payload = payloadTranslator.toMultiuser(segment
 					.getPayload());
 			result.setPayload(payload);
@@ -261,9 +291,6 @@ public class TCPTranslator extends
 		result.setUnknown7((byte) 0);
 		result.setUnknown8(0);
 		
-		ConnectionSlot connectionSlot = new ConnectionSlot(segment
-				.getSourcePort(), segment.getDestinationPort(),
-				Direction.NETWORK);
 		SequenceTranslator sequenceTranslator = sequenceTranslatorMap
 				.get(connectionSlot);
 		
