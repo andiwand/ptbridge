@@ -26,7 +26,7 @@ public class EthernetTraverser {
 								size);
 						sendToMultiuserLink(frame);
 					} catch (RuntimeException e) {
-						e.printStackTrace();
+//						e.printStackTrace();
 					}
 				}
 			} catch (IOException e) {
@@ -49,7 +49,7 @@ public class EthernetTraverser {
 								.toNetwork(multiuserFrame);
 						sendToEthernet(frame);
 					} catch (RuntimeException e) {
-						e.printStackTrace();
+//						e.printStackTrace();
 					}
 				}
 			} catch (IOException e) {

@@ -96,9 +96,6 @@ public class MultiuserNetworkPacket extends MultiuserPacket {
 		random = reader.readInt();
 		linkId = reader.readInt();
 		
-		System.out
-				.println(new String(reader.getData()).replaceAll("\0", " | "));
-		
 		String payloadName = reader.readString();
 		payload = PAYLOAD_ASSOCIATOR.getPayloadInstance(payloadName);
 		if (payload != null) payload.parse(reader);
