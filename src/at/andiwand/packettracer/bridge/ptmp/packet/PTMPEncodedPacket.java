@@ -33,18 +33,18 @@ public class PTMPEncodedPacket extends PTMPPacket {
 		return encoding;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		if (writer.getEncoding() != encoding)
+	public void getValue(PTMPDataWriter out) {
+		if (out.getEncoding() != encoding)
 			throw new IllegalArgumentException("Illegal encoding!");
 		
-		writer.write(value);
+		out.write(value);
 	}
 	
 	public byte[] getBytes() {
 		return super.getBytes(encoding);
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
+	public void parseValue(PTMPDataReader in) {
 		throw new UnsupportedOperationException();
 	}
 	

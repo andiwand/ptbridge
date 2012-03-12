@@ -3,6 +3,7 @@ package at.andiwand.packettracer.bridge.test;
 import java.net.InetAddress;
 
 import at.andiwand.packetsocket.EthernetSocket;
+import at.andiwand.packettracer.bridge.ptmp.PTMPAssignments;
 import at.andiwand.packettracer.bridge.ptmp.PTMPAuthentication;
 import at.andiwand.packettracer.bridge.ptmp.PTMPCompression;
 import at.andiwand.packettracer.bridge.ptmp.PTMPConfiguration;
@@ -22,17 +23,35 @@ import at.andiwand.packettracer.bridge.traverser.EthernetTraverser;
 public class EthernetTraverserTest {
 	
 	public static void main(String[] args) throws Throwable {
+		String interfaze = "eth0";
+		InetAddress address = InetAddress.getByName("127.0.0.1");
+		int port = PTMPAssignments.PORT;
+		
+		if (args.length > 0) {
+			try {
+				interfaze = args[0];
+				String[] tmp = args[1].split(":");
+				address = InetAddress.getByName(tmp[0]);
+				if (tmp.length > 1) port = Integer.parseInt(tmp[1]);
+			} catch (Throwable t) {
+				System.err
+						.println("usage: <program> [<interface> <pt_ip>[:<pt_port>]]");
+				System.err.println();
+				System.err.println("default: eth0 127.0.0.1:38000");
+				System.exit(1);
+			}
+		}
+		
 		EthernetSocket ethernetSocket = new EthernetSocket(
 				EthernetSocket.PROTOCOL_ALL);
-		ethernetSocket.bind("eth0");
-		ethernetSocket.enablePromiscMode("eth0");
+		ethernetSocket.bind(interfaze);
+		ethernetSocket.enablePromiscMode(interfaze);
 		
 		PTMPConnection ptmpConnection = new PTMPConnection();
 		ptmpConnection.setPreferredConfiguration(new PTMPConfiguration(
 				PTMPEncoding.TEXT, PTMPEncryption.NONE, PTMPCompression.NO,
 				PTMPAuthentication.CLEAR_TEXT, 0));
-		ptmpConnection.connect(InetAddress.getByName("127.0.0.1"),
-				"PacketTracer Bridge", "");
+		ptmpConnection.connect(address, port, "PacketTracer Bridge", "");
 		MultiuserConnection multiuserConnection = new MultiuserConnection(
 				"Ethernet");
 		MultiuserLinkDefinition linkDefinition = new MultiuserLinkDefinition(

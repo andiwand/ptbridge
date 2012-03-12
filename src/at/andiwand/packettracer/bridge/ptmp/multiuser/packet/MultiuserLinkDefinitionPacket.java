@@ -186,7 +186,7 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 	public MultiuserLinkDefinition getDefinition() {
 		return definition;
 	}
-
+	
 	@Override
 	public void getValue(PTMPDataWriter writer) {
 		writer.writeInt(0);
@@ -194,6 +194,7 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 		writer.writeInt(linkId);
 		writer.writeUuid(definition.getUuid());
 		writer.writeInt(-1);
+		writer.writeInt(4); // TODO: WHAT?!
 		writer.writeInt(LinkTypeTranslator.encode(definition.getType()));
 		writer.writeString(definition.getInterfaceName());
 		writer.writeInt(InterfaceTypeTranslator.encode(definition
@@ -234,6 +235,7 @@ public class MultiuserLinkDefinitionPacket extends MultiuserPacket {
 		linkId = reader.readInt();
 		definition = new MultiuserLinkDefinition(reader.readUuid());
 		reader.readInt();
+		reader.readInt(); // TODO: WHAT?!
 		definition.setType(LinkTypeTranslator.decode(reader.readInt()));
 		definition.setInterfaceName(reader.readString());
 		definition.setInterfaceType(InterfaceTypeTranslator.decode(reader

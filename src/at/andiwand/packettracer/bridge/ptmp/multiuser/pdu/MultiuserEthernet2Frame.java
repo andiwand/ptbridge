@@ -5,13 +5,14 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPDataReader;
 import at.andiwand.packettracer.bridge.ptmp.PTMPDataWriter;
 
 
+// TODO: fix attribute types
 public class MultiuserEthernet2Frame extends MultiuserPDU {
 	
 	private static final MultiuserPayloadAssociator PAYLOAD_ASSOCIATOR = new MultiuserPayloadAssociator();
 	
 	static {
-		PAYLOAD_ASSOCIATOR.putEntry("CIpHeader", MultiuserIPv4Packet.class);
-		PAYLOAD_ASSOCIATOR.putEntry("CArpPacket", MultiuserARPPacket.class);
+		PAYLOAD_ASSOCIATOR.putEntry("IpHeader", MultiuserIPv4Packet.class);
+		PAYLOAD_ASSOCIATOR.putEntry("ArpPacket", MultiuserARPPacket.class);
 		// PAYLOAD_ASSOCIATOR.putEntry("CIpv6Header",
 		// MultiuserIPv6Packet.class);
 	}
@@ -48,8 +49,8 @@ public class MultiuserEthernet2Frame extends MultiuserPDU {
 		writer.writeString(payloadName);
 		payload.getBytes(writer);
 		
-		writer.writeMACAddress(source);
 		writer.writeMACAddress(destination);
+		writer.writeMACAddress(source);
 		writer.writeShort(unknown1);
 		writer.writeInt(type);
 	}
@@ -79,8 +80,8 @@ public class MultiuserEthernet2Frame extends MultiuserPDU {
 		payload = PAYLOAD_ASSOCIATOR.getPayloadInstance(payloadName);
 		payload.parse(reader);
 		
-		source = reader.readMACAddress();
 		destination = reader.readMACAddress();
+		source = reader.readMACAddress();
 		unknown1 = reader.readShort();
 		type = reader.readInt();
 	}

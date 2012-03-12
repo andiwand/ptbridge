@@ -21,7 +21,7 @@ public class PTMPPacketReader {
 	private PTMPEncryption encryption;
 	private PTMPCompression compression;
 	
-	private PTMPDataInputStream dataInputStream;
+	private PTMPDataInputStream in;
 	
 	private byte[] decryptionKey;
 	
@@ -29,19 +29,18 @@ public class PTMPPacketReader {
 		this(inputStream, PTMPConfiguration.DEFAULT);
 	}
 	
-	public PTMPPacketReader(InputStream inputStream, PTMPEncoding encoding,
+	public PTMPPacketReader(InputStream in, PTMPEncoding encoding,
 			PTMPEncryption encryption, PTMPCompression compression) {
 		this.encoding = encoding;
 		this.encryption = encryption;
 		this.compression = compression;
 		
-		dataInputStream = new PTMPDataInputStream(inputStream, encoding);
+		this.in = new PTMPDataInputStream(in, encoding);
 	}
 	
-	public PTMPPacketReader(InputStream inputStream,
-			PTMPConfiguration configuration) {
-		this(inputStream, configuration.getEncoding(), configuration
-				.getEncryption(), configuration.getCompression());
+	public PTMPPacketReader(InputStream in, PTMPConfiguration configuration) {
+		this(in, configuration.getEncoding(), configuration.getEncryption(),
+				configuration.getCompression());
 	}
 	
 	public PTMPEncoding getEncoding() {
@@ -63,7 +62,7 @@ public class PTMPPacketReader {
 	public void setEncoding(PTMPEncoding encoding) {
 		this.encoding = encoding;
 		
-		dataInputStream.setEncoding(encoding);
+		in.setEncoding(encoding);
 	}
 	
 	public void setEncryption(PTMPEncryption encryption) {
@@ -95,10 +94,10 @@ public class PTMPPacketReader {
 		byte[] data;
 		
 		synchronized (this) {
-			length = dataInputStream.readInt();
+			length = in.readInt();
 			
 			data = new byte[length];
-			dataInputStream.read(data);
+			in.read(data);
 		}
 		
 		InputStream inputStream = new ByteArrayInputStream(data);

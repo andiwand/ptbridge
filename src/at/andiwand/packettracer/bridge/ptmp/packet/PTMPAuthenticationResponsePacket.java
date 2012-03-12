@@ -19,8 +19,8 @@ public class PTMPAuthenticationResponsePacket extends PTMPPacket {
 		this.digestText = digestText;
 	}
 	
-	public PTMPAuthenticationResponsePacket(PTMPDataReader reader) {
-		super(reader);
+	public PTMPAuthenticationResponsePacket(PTMPDataReader in) {
+		super(in);
 	}
 	
 	public PTMPAuthenticationResponsePacket(byte[] packet, PTMPEncoding encoding) {
@@ -47,10 +47,10 @@ public class PTMPAuthenticationResponsePacket extends PTMPPacket {
 		return digestText;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		writer.writeString(username);
-		writer.writeString(digestText);
-		writer.writeString("");
+	public void getValue(PTMPDataWriter out) {
+		out.writeString(username);
+		out.writeString(digestText);
+		out.writeString("");
 	}
 	
 	public void setUsername(String username) {
@@ -61,10 +61,10 @@ public class PTMPAuthenticationResponsePacket extends PTMPPacket {
 		this.digestText = digestText;
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
-		username = reader.readString();
-		digestText = reader.readString();
-		reader.readString();
+	public void parseValue(PTMPDataReader in) {
+		username = in.readString();
+		digestText = in.readString();
+		in.readString();
 	}
 	
 	protected boolean legalType(int type) {

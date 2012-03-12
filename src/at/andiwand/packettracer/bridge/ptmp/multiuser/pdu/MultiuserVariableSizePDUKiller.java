@@ -5,7 +5,7 @@ import at.andiwand.packettracer.bridge.ptmp.PTMPDataReader;
 
 public class MultiuserVariableSizePDUKiller {
 	
-	public static final String HEAD = "CVariableSizePdu";
+	public static final String HEAD = "VariableSizePdu";
 	
 	public static void kill(PTMPDataReader dataReader) {
 		String variableSizePdu = dataReader.readString();
@@ -15,13 +15,14 @@ public class MultiuserVariableSizePDUKiller {
 		if (!variableSizePdu.equals(HEAD))
 			throw new IllegalStateException("No variable size PDU");
 		
-		int size = dataReader.readInt();
-		if (dataReader.readInt() != size)
-			throw new IllegalStateException("Different size");
+		dataReader.readInt();
+//		int size = dataReader.readInt();
+//		if (dataReader.readInt() != size)
+//			throw new IllegalStateException("Different size");
 		
-		for (int i = 0; i < size; i++) {
-			dataReader.readString();
-		}
+//		for (int i = 0; i < size; i++) {
+//			dataReader.readString();
+//		}
 	}
 	
 }

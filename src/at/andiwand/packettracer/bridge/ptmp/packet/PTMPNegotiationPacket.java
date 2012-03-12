@@ -194,8 +194,8 @@ public class PTMPNegotiationPacket extends PTMPPacket {
 		this(type, UUID.randomUUID(), configuration, new Date());
 	}
 	
-	public PTMPNegotiationPacket(PTMPDataReader reader) {
-		super(reader);
+	public PTMPNegotiationPacket(PTMPDataReader in) {
+		super(in);
 	}
 	
 	public PTMPNegotiationPacket(byte[] packet, PTMPEncoding encoding) {
@@ -226,20 +226,19 @@ public class PTMPNegotiationPacket extends PTMPPacket {
 		return timestamp;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		writer.writeString(PTMP_IDENTIFIER);
-		writer.writeInt(PTMP_VERSION);
-		writer.writeUuid(applicationId);
-		writer.writeInt(EncodingTranslator.encode(configuration.getEncoding()));
-		writer.writeInt(EncryptionTranslator.encode(configuration
-				.getEncryption()));
-		writer.writeInt(CompressionTranslator.encode(configuration
+	public void getValue(PTMPDataWriter out) {
+		out.writeString(PTMP_IDENTIFIER);
+		out.writeInt(PTMP_VERSION);
+		out.writeUuid(applicationId);
+		out.writeInt(EncodingTranslator.encode(configuration.getEncoding()));
+		out.writeInt(EncryptionTranslator.encode(configuration.getEncryption()));
+		out.writeInt(CompressionTranslator.encode(configuration
 				.getCompression()));
-		writer.writeInt(AuthenticationTranslator.encode(configuration
+		out.writeInt(AuthenticationTranslator.encode(configuration
 				.getAuthentication()));
-		writer.writeTimestamp(timestamp);
-		writer.writeInt(configuration.getKeepalive());
-		writer.writeString("");
+		out.writeTimestamp(timestamp);
+		out.writeInt(configuration.getKeepalive());
+		out.writeString("");
 	}
 	
 	public void setApplicationId(UUID applicationId) {
@@ -254,7 +253,7 @@ public class PTMPNegotiationPacket extends PTMPPacket {
 		this.timestamp = timestamp;
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
+	public void parseValue(PTMPDataReader in) {
 		String ptmpIdentifier;
 		int ptmpVersion;
 		PTMPEncoding encoding;
@@ -263,22 +262,22 @@ public class PTMPNegotiationPacket extends PTMPPacket {
 		PTMPAuthentication authentication;
 		int keepalive;
 		
-		ptmpIdentifier = reader.readString();
+		ptmpIdentifier = in.readString();
 		if (!ptmpIdentifier.equals(PTMP_IDENTIFIER))
 			throw new IllegalArgumentException("PTMP identifier not found!");
 		
-		ptmpVersion = reader.readInt();
+		ptmpVersion = in.readInt();
 		if (ptmpVersion != PTMP_VERSION)
 			throw new IllegalArgumentException("Unsupported PTMP version!");
 		
-		applicationId = reader.readUuid();
-		encoding = EncodingTranslator.decode(reader.readInt());
-		encryption = EncryptionTranslator.decode(reader.readInt());
-		compression = CompressionTranslator.decode(reader.readInt());
-		authentication = AuthenticationTranslator.decode(reader.readInt());
-		timestamp = reader.readTimestamp();
-		keepalive = reader.readInt();
-		reader.readString();
+		applicationId = in.readUuid();
+		encoding = EncodingTranslator.decode(in.readInt());
+		encryption = EncryptionTranslator.decode(in.readInt());
+		compression = CompressionTranslator.decode(in.readInt());
+		authentication = AuthenticationTranslator.decode(in.readInt());
+		timestamp = in.readTimestamp();
+		keepalive = in.readInt();
+		in.readString();
 		
 		configuration = new PTMPConfiguration(encoding, encryption,
 				compression, authentication, keepalive);

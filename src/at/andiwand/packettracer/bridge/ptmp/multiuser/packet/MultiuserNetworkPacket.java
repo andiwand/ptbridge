@@ -16,7 +16,7 @@ public class MultiuserNetworkPacket extends MultiuserPacket {
 	private static final MultiuserPayloadAssociator PAYLOAD_ASSOCIATOR = new MultiuserPayloadAssociator();
 	
 	static {
-		PAYLOAD_ASSOCIATOR.putEntry("CEtherentIIHeader",
+		PAYLOAD_ASSOCIATOR.putEntry("EthernetIIHeader",
 				MultiuserEthernet2Frame.class);
 	}
 	

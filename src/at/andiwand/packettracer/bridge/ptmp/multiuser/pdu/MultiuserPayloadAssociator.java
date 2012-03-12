@@ -25,7 +25,7 @@ public class MultiuserPayloadAssociator {
 		try {
 			return payloadClass.newInstance();
 		} catch (Exception e) {
-			throw new IllegalStateException("Unreachable section");
+			throw new IllegalStateException("Cannot create instace!");
 		}
 	}
 	

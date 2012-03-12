@@ -1,5 +1,11 @@
 package at.andiwand.packettracer.bridge.traverser.translator;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import at.andiwand.library.network.ip.IPv4Address;
 import at.andiwand.packetsocket.pdu.ICMPPacket;
 import at.andiwand.packetsocket.pdu.IPv4Packet;
 import at.andiwand.packetsocket.pdu.PDU;
@@ -26,15 +32,46 @@ public class IPv4Translator extends
 		}
 	};
 	
+	private final Map<Set<IPv4Address>, TranslationHelper> translationAssociatorMap = new HashMap<Set<IPv4Address>, TranslationHelper>();
+	
+	private TranslationHelper getTranslationHelper(IPv4Address address1,
+			IPv4Address address2) {
+		Set<IPv4Address> addressSet = new HashSet<IPv4Address>();
+		addressSet.add(address1);
+		addressSet.add(address2);
+		
+		TranslationHelper result = translationAssociatorMap.get(addressSet);
+		if (result == null) {
+			result = new TranslationHelper(TRANSLATION_ASSOCIATOR);
+			translationAssociatorMap.put(addressSet, result);
+		}
+		
+		return result;
+	}
+	
+	private PDUTranslator getTranslator(IPv4Address address1,
+			IPv4Address address2, Class<?> payloadClass) {
+		return getTranslationHelper(address1, address2).getTranslator(
+				payloadClass);
+	}
+	
+	private MultiuserPDU toMultiuser(IPv4Packet packet) {
+		PDUTranslator translator = getTranslator(packet.getSource(), packet
+				.getDestination(), packet.getPayload().getClass());
+		return translator.toMultiuser(packet.getPayload());
+	}
+	
+	private PDU toNetwork(MultiuserIPv4Packet packet) {
+		PDUTranslator translator = getTranslator(packet.getSource(), packet
+				.getDestination(), packet.getPayload().getClass());
+		return translator.toNetwork(packet.getPayload());
+	}
+	
 	@Override
 	protected MultiuserIPv4Packet toMultiuserGeneric(IPv4Packet packet) {
 		MultiuserIPv4Packet result = new MultiuserIPv4Packet();
 		
-		Class<?> payloadClass = packet.getPayload().getClass();
-		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-				.getTranslator(payloadClass);
-		MultiuserPDU payload = payloadTranslator.toMultiuser(packet
-				.getPayload());
+		MultiuserPDU payload = toMultiuser(packet);
 		result.setPayload(payload);
 		
 		result.setVersion(packet.getVersion());
@@ -66,10 +103,7 @@ public class IPv4Translator extends
 		result.setSource(packet.getSource());
 		result.setDestination(packet.getDestination());
 		
-		Class<?> payloadClass = packet.getPayload().getClass();
-		PDUTranslator payloadTranslator = TRANSLATION_ASSOCIATOR
-				.getTranslator(payloadClass);
-		PDU payload = payloadTranslator.toNetwork(packet.getPayload());
+		PDU payload = toNetwork(packet);
 		result.setPayload(payload);
 		
 		return result;

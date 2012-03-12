@@ -9,16 +9,16 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	private static final MultiuserPayloadAssociator PAYLOAD_ASSOCIATOR = new MultiuserPayloadAssociator();
 	
 	static {
-		PAYLOAD_ASSOCIATOR.putEntry("CTelnetPacket",
+		PAYLOAD_ASSOCIATOR.putEntry("TelnetPacket",
 				MultiuserTelnetSegment.class);
 	}
 	
 	private MultiuserPDU payload;
-	private short sourcePort;
-	private short destinationPort;
-	private int unknown2;
-	private int sequenceNumber;
-	private int acknowledgmentNumber;
+	private int sourcePort;
+	private int destinationPort;
+	private int unknown1;
+	private long sequenceNumber;
+	private long acknowledgmentNumber;
 	private byte unknown3;
 	private byte unknown4;
 	private byte flags;
@@ -32,23 +32,23 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 		return payload;
 	}
 	
-	public short getSourcePort() {
+	public int getSourcePort() {
 		return sourcePort;
 	}
 	
-	public short getDestinationPort() {
+	public int getDestinationPort() {
 		return destinationPort;
 	}
 	
 	public int getUnknown2() {
-		return unknown2;
+		return unknown1;
 	}
 	
-	public int getSequenceNumber() {
+	public long getSequenceNumber() {
 		return sequenceNumber;
 	}
 	
-	public int getAcknowledgmentNumber() {
+	public long getAcknowledgmentNumber() {
 		return acknowledgmentNumber;
 	}
 	
@@ -85,54 +85,60 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	}
 	
 	public void getBytes(PTMPDataWriter writer) {
-		Class<? extends MultiuserPDU> payloadClass = payload.getClass();
-		String payloadName = PAYLOAD_ASSOCIATOR.getPayloadName(payloadClass);
-		writer.writeString(payloadName);
-		payload.getBytes(writer);
+		if (payload != null) {
+			Class<? extends MultiuserPDU> payloadClass = payload.getClass();
+			String payloadName = PAYLOAD_ASSOCIATOR
+					.getPayloadName(payloadClass);
+			writer.writeString(payloadName);
+			payload.getBytes(writer);
+		} else {
+			writer.writeString("");
+		}
 		
-		writer.writeShort(sourcePort);
-		writer.writeShort(destinationPort);
-		writer.writeInt(unknown2);
-		writer.writeInt(sequenceNumber);
-		writer.writeInt(acknowledgmentNumber);
+		writer.writeShort((short) sourcePort);
+		writer.writeShort((short) destinationPort);
+		writer.writeInt(unknown1);
+		writer.writeInt((int) sequenceNumber);
+		writer.writeInt((int) acknowledgmentNumber);
 		writer.writeByte(unknown3);
 		writer.writeByte(unknown4);
 		writer.writeByte(flags);
 		writer.writeShort(unknown5);
 		writer.writeShort(unknown6);
 		writer.writeShort(unknown7);
-		writer.writeInt(unknown8);
-		writer.writeInt(unknown9);
 		
-		if (unknown9 == 1) {
+		if (unknown7 == 1) {
 			writer.writeString("CTcpOptionMSS");
 			writer.writeInt(2);
 			writer.writeInt(4);
 			writer.writeInt(1460);
 		}
+		
+		writer.writeInt(unknown8);
+		writer.writeInt(unknown9);
 	}
 	
 	public void setPayload(MultiuserPDU payload) {
 		this.payload = payload;
 	}
 	
-	public void setSourcePort(short sourcePort) {
+	public void setSourcePort(int sourcePort) {
 		this.sourcePort = sourcePort;
 	}
 	
-	public void setDestinationPort(short destinationPort) {
+	public void setDestinationPort(int destinationPort) {
 		this.destinationPort = destinationPort;
 	}
 	
 	public void setUnknown2(int unknown2) {
-		this.unknown2 = unknown2;
+		this.unknown1 = unknown2;
 	}
 	
-	public void setSequenceNumber(int sequenceNumber) {
+	public void setSequenceNumber(long sequenceNumber) {
 		this.sequenceNumber = sequenceNumber;
 	}
 	
-	public void setAcknowledgmentNumber(int acknowledgmentNumber) {
+	public void setAcknowledgmentNumber(long acknowledgmentNumber) {
 		this.acknowledgmentNumber = acknowledgmentNumber;
 	}
 	
@@ -171,31 +177,46 @@ public class MultiuserTCPSegment extends MultiuserPDU {
 	public void parse(PTMPDataReader reader) {
 		String payloadName = reader.readString();
 		
-		if (!payloadName.isEmpty()) {
+		if (payloadName.equals("VariableSizePdu")) {
+			reader.readInt();
+		} else if (payloadName.equals("PduGroup")) {
+			int size = reader.readInt();
+			MultiuserPDU[] payloads = new MultiuserPDU[size];
+			
+			for (int i = 0; i < size; i++) {
+				payloadName = reader.readString();
+				payloads[i] = PAYLOAD_ASSOCIATOR
+						.getPayloadInstance(payloadName);
+				payloads[i].parse(reader);
+			}
+			
+			payload = payloads[0];
+		} else if (!payloadName.isEmpty()) {
 			payload = PAYLOAD_ASSOCIATOR.getPayloadInstance(payloadName);
 			payload.parse(reader);
 		}
 		
-		sourcePort = reader.readShort();
-		destinationPort = reader.readShort();
-		unknown2 = reader.readInt();
-		sequenceNumber = reader.readInt();
-		acknowledgmentNumber = reader.readInt();
+		sourcePort = reader.readShort() & 0xffff;
+		destinationPort = reader.readShort() & 0xffff;
+		unknown1 = reader.readInt();
+		sequenceNumber = reader.readInt() & 0xffffffffl;
+		acknowledgmentNumber = reader.readInt() & 0xffffffffl;
 		unknown3 = reader.readByte();
 		unknown4 = reader.readByte();
 		flags = reader.readByte();
 		unknown5 = reader.readShort();
 		unknown6 = reader.readShort();
 		unknown7 = reader.readShort();
-		unknown8 = reader.readInt();
-		unknown9 = reader.readInt();
 		
-		if (unknown9 == 1) {
+		if (unknown7 == 1) {
 			reader.readString();
 			reader.readInt();
 			reader.readInt();
 			reader.readInt();
 		}
+		
+		unknown8 = reader.readInt();
+		unknown9 = reader.readInt();
 	}
 	
 }

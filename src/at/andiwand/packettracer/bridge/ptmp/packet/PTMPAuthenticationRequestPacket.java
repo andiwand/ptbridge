@@ -17,8 +17,8 @@ public class PTMPAuthenticationRequestPacket extends PTMPPacket {
 		this.username = username;
 	}
 	
-	public PTMPAuthenticationRequestPacket(PTMPDataReader reader) {
-		super(reader);
+	public PTMPAuthenticationRequestPacket(PTMPDataReader in) {
+		super(in);
 	}
 	
 	public PTMPAuthenticationRequestPacket(byte[] packet, PTMPEncoding encoding) {
@@ -40,16 +40,16 @@ public class PTMPAuthenticationRequestPacket extends PTMPPacket {
 		return username;
 	}
 	
-	public void getValue(PTMPDataWriter writer) {
-		writer.writeString(username);
+	public void getValue(PTMPDataWriter out) {
+		out.writeString(username);
 	}
 	
 	public void setUsername(String username) {
 		this.username = username;
 	}
 	
-	public void parseValue(PTMPDataReader reader) {
-		username = reader.readString();
+	public void parseValue(PTMPDataReader in) {
+		username = in.readString();
 	}
 	
 	protected boolean legalType(int type) {
