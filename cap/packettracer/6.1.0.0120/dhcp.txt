@@ -1,0 +1,5 @@
+Requests:
+| 1 | 1 | 1 | 6 | 0 | 1913221C | 0 | -32768 | 0.0.0.0 | 0.0.0.0 | 0.0.0.0 | 0.0.0.0 | 0.0.0.0 | 0001.C7C8.26EE |  |  | 1 | DhcpOptionClientIdentifier | 61 | 61 | 0 | 1 | 0001.C7C8.26EE | 0 | 0 | 0 | 0.0.0.0 |
+| 1 | 1 | 1 | 6 | 0 | 8E503D68 | 0 | -32768 | 0.0.0.0 | 0.0.0.0 | 0.0.0.0 | 0.0.0.0 | 0.0.0.0 | 0001.C7C8.26EE |  |  | 1 | DhcpOptionClientIdentifier | 61 | 61 | 0 | 1 | 0001.C7C8.26EE | 0 | 0 | 0 | 0.0.0.0 |
+
+| operation type | hardware type? | hardware type? | address length | hops? | connection id | startup time | flags | client ip | your ip | server ip | gateway ip | subnet mask | client hardware address | server name | file name | tftp server ip | ? | ? | dns server ip |

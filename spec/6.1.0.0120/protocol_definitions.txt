@@ -1,0 +1,107 @@
+CEthernetIIHeader
+
+binary
+| mac | mac | short | int |
+
+logical
+| src mac | dst mac | ? | type |
+
+
+CArpPacket
+
+binary
+| short | short | byte | byte | short | - | - | - | - |
+
+logical
+| l2 add type | l3 add type | l2 add size | l3 add size | operation | src l2 add | dst l2 add | src l3 add | dst l3 add |
+
+
+CIpHeader
+
+binary
+| byte | byte | byte | short | short | byte | short | short | short | short | int | int | ip4 | ip4 |
+
+logical
+| version | IHL | TOS | total length | identifier | flags | fragment offset | ttl | protocol | checksum | ? | ? | src ip | dst ip |
+
+
+CIcmpHeader
+
+binary
+| byte | byte | short | short | short |
+
+logical
+| type | code | checksum | identifier | sequence number |
+
+
+CTcpHeader
+
+binary
+| short | short | ? | int | int | byte | byte | byte | short | short | short | int | int |
+
+logical
+| src port | dst port | ? | sequence number | acknowledgment number | ? | flags | ? | ? | ? | ? | options flag? |
+
+
+CUdpHeader
+
+binary
+| short | short | short | short |
+
+logical
+| src port | dst port | length | checksum |
+
+
+CDhcpPacket
+
+binary
+| byte? | byte? | byte? | byte? | byte? | string | short | short | int | int | int | ip4 | ip4 | ip4 | ip4 | ip4 | - | string | string | ipv4 | int | string | ipv4 |
+
+logical
+| message type | ? | ? | ? | ? | connection id | startup time | flags | ? | ? | ? | client ip | your ip | server ip | gateway ip | subnet mask | client hardware address | server name | file name | tftp server ip | ? | ? | dns server ip |
+
+
+CDnsMessage
+
+	/*
+	 * CDnsHeader, 13827, false, 1, false, false, true, false, 0, 1, 0, 0,
+	 * test.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 0, 0, 0
+	 * 
+	 * CDnsHeader, 16844, true, 1, false, false, true, false, 0, 1, 1, 0,
+	 * test.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 1,
+	 * test.local, 4, 1, 86400, 4, -4713, 1, 1, 0, 0, 0, 0, true, 192.168.15.101,
+	 * 0, 0
+	 * 
+	 * CDnsHeader, 43966, true, 1, false, false, true, false, 0, 1, 2, 0,
+	 * t.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 2,
+	 * t.local, 0, 1, 86400, 10, -4713, 1, 1, 0, 0, 0, 0, true, true,
+	 * test.local, 4, 1, 86400, 4, -4713, 1, 1, 0, 0, 0, 0, true, 192.168.15.101,
+	 * 0, 0
+	 * 
+	 * header
+	 * 		CDnsHeader, 16844, true, 1, false, false, true, false, 0, 1, 1, 0
+	 * entry
+	 * 		test.local, 4, 1, 86400, 0, -4713, 1, 1, 0, 0, 0, 0, false, 1
+	 * trailing
+	 * 		0, 0
+	 * 
+	 * header
+	 * 		CDnsHeader, id, response, operation code, aa, tc,
+	 * 		rd, ra, aa count, tc count, rd count, ra count
+	 * entry
+	 * 		domain name, type?, class, time to live, data length?,
+	 * 		?, 1, 1, 0, 0, 0, 0, payload y/n?, payload
+	 * trailing
+	 * 		0, 0
+	 */
+
+
+CSnmpPdu
+
+| type | request id | error status | error index | variable bindings | item1 | item-name1 | ?1 (=14) | value1 | ... | version | community |
+
+type
+	0	get request
+	1	get bulk request
+	2	get response
+	3	set request
