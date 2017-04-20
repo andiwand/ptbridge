@@ -21,18 +21,13 @@ import at.stefl.ptbridge.traverser.EthernetTraverser;
 
 public class Main {
 	
-	public static final String DEFAULT = "eth0 192.168.15.101:38000 cisco";
-	public static final String USAGE = "usage: <ptbridge> [<interface> <pt_ip>:<pt_port> <password>]\n\ndefault: " + DEFAULT;
+	public static final String USAGE = "usage: ptbridge <interface> <pt_ip>:<pt_port> <password>";
 	
 	public static void main(String[] args) throws Throwable {
 		String interfaze;
 		InetAddress address;
 		int port;
 		String password;
-		
-		if (args.length == 0) {
-			args = DEFAULT.split("[ \t]+");
-		}
 		
 		try {
 			interfaze = args[0];
