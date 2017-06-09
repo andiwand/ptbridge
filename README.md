@@ -6,7 +6,7 @@ Sadly packet tracer packets and protocols are different to real ones which makes
 to translate them and inflexible. So there is only a handful of protocols implemented and
 these could be unstable.
 
-It is not possible to pass generic data through pt networks, like over udp or tcp.
+It is not possible to pass generic data through pt networks, like usually over ip, tcp or udp.
 
 ## Supported protocols
 
