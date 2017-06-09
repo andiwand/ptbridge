@@ -27,8 +27,8 @@ be connected. In the vm ptbridge needs to be started as root due to low level ne
 
 Then you need to setup packet tracer for multiuser connection. There are alot tutorials and
 videos about this on the internet. The packet tracer instance need to be in server mode.
-Try the connection with a second packet tracer instance.
+Try the connection with a second packet tracer instance. After that, you can connect the
+ptbridge to packer tracer.
 
-After that you can connect the ptbridge to packer tracer. The usage of this tool is:
+The usage of this tool should be self explanatory:
 `./ptbridge.jar <interface> <pt_ip>:<pt_port> <password>`
-This sould be self-explanatory.
