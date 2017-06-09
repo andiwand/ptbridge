@@ -30,5 +30,5 @@ videos about this on the internet. The packet tracer instance need to be in serv
 Try the connection with a second packet tracer instance.
 
 After that you can connect the ptbridge to packer tracer. The usage of this tool is:
-`./ptbridge <interface> <pt_ip>:<pt_port> <password>`
+`./ptbridge.jar <interface> <pt_ip>:<pt_port> <password>`
 This sould be self-explanatory.
